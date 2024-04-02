@@ -1,3 +1,0 @@
-Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
-"Q:/_Dev/Gala/Project/Gala/Content/enemy.png","Q:/_Dev/Gala/Project/Gala/Content/bin/Windows/Content/enemy.xnb","TextureProcessor","Texture2DContent",26408,65621,0.2202482
-"Q:/_Dev/Gala/Project/Gala/Content/ship.png","Q:/_Dev/Gala/Project/Gala/Content/bin/Windows/Content/ship.xnb","TextureProcessor","Texture2DContent",17433,65621,0.0098062
