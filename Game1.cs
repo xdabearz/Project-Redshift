@@ -11,8 +11,6 @@ namespace Gala
     {
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
-        private Texture2D player;
-        private Vector2 playerPosition;
         private EnemyManager enemyManager;
         private InputSystem inputSystem;
         private PhysicsSystem physics;
