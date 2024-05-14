@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace Gala
 {
@@ -11,6 +12,7 @@ namespace Gala
         private SpriteBatch spriteBatch;
         private EnemyManager enemyManager;
         private World world;
+        
 
         public Game1()
         {
@@ -27,6 +29,7 @@ namespace Gala
 
             // This is relative to where the .exe runs from. Will be created on runtime if it doesn't exist
             world = new World("Data/keybinds.json");
+            world.AddCamera(GraphicsDevice.Viewport);
 
             enemyManager = new EnemyManager(Content.Load<Texture2D>("enemy"));
             
@@ -59,11 +62,12 @@ namespace Gala
         {
             GraphicsDevice.Clear(Color.Black);
 
-            spriteBatch.Begin();
+            var camera = world.Camera;
+            spriteBatch.Begin(transformMatrix: camera.View * camera.Projection);
 
             world.Draw(gameTime, spriteBatch);
             enemyManager.DrawEnemies(spriteBatch);
-
+            
             spriteBatch.End();
 
             base.Draw(gameTime);

@@ -13,10 +13,14 @@ namespace Gala
         private InputSystem inputSystem;
         private MoveSystem moveSystem;
 
+        private int playerEntityId;
+
         // Input stuff
         private Vector2 moveDirection;
 
         private readonly float moveSpeed = 300; // pixels per second
+        
+        public FollowCamera Camera { get; private set; }
 
         public World(string filepath)
         {
@@ -33,14 +37,14 @@ namespace Gala
         public void CreatePlayer(ContentManager content)
         {
             // Creating the player entity
-            int playerId = entityManager.CreateEntity();
-            entityManager.AddComponent(playerId, ComponentFlag.InputComponent, new InputComponent());
-            entityManager.AddComponent(playerId, ComponentFlag.GraphicComponent, new GraphicComponent
+            playerEntityId = entityManager.CreateEntity();
+            entityManager.AddComponent(playerEntityId, ComponentFlag.InputComponent, new InputComponent());
+            entityManager.AddComponent(playerEntityId, ComponentFlag.GraphicComponent, new GraphicComponent
             {
                 offset = new Vector2(-64, -64),
                 texture = content.Load<Texture2D>("ship")
             });
-            entityManager.AddComponent(playerId, ComponentFlag.TransformComponent, new TransformComponent
+            entityManager.AddComponent(playerEntityId, ComponentFlag.TransformComponent, new TransformComponent
             {
                 position = new Vector2(400, 400)
             });
@@ -55,6 +59,8 @@ namespace Gala
             {
                 moveSystem.ApplyMovement(ref entityManager.GetTransformComponent(entity.Id), moveDirection * moveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds);
             }
+
+            Camera.Update();
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -69,6 +75,11 @@ namespace Gala
 
                 spriteBatch.Draw(graphic.texture, transform.position, Color.White);
             }
+        }
+
+        public void AddCamera(Viewport viewport)
+        {
+            Camera = new FollowCamera(viewport, playerEntityId, entityManager);
         }
     }
 }
