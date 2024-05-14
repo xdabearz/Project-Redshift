@@ -1,6 +1,4 @@
-﻿using Gala.Components;
-using Gala.Manager;
-using Gala.Systems;
+﻿using Gala.Manager;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -12,11 +10,7 @@ namespace Gala
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
         private EnemyManager enemyManager;
-        private InputSystem inputSystem;
-        private PhysicsSystem physics;
-        private int pk; // player physics key
-        private Graphics playerGraphics;
-        private  float moveSpeed = 300; // pixels per second
+        private World world;
 
         public Game1()
         {
@@ -32,10 +26,7 @@ namespace Gala
             graphics.ApplyChanges();
 
             // This is relative to where the .exe runs from. Will be created on runtime if it doesn't exist
-            inputSystem = new InputSystem("Data/keybinds.json");
-            physics = new PhysicsSystem();
-            // Setting initial position when we add it
-            pk = physics.Add(new Vector2(400, 400));
+            world = new World("Data/keybinds.json");
 
             enemyManager = new EnemyManager(Content.Load<Texture2D>("enemy"));
             
@@ -45,8 +36,7 @@ namespace Gala
         // Load initial resources
         protected override void LoadContent()
         {
-            playerGraphics = new Graphics(0, Content.Load<Texture2D>("ship"));
-            playerGraphics.Offset = new Vector2(-64, -64);
+            world.CreatePlayer(Content);
 
             spriteBatch = new SpriteBatch(GraphicsDevice);
         }
@@ -56,9 +46,8 @@ namespace Gala
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            Vector2 moveDirection = inputSystem.GetMovement();
-            // This will be more automated with a way to handle entities as groups of components
-            physics.ApplyMovement(pk, moveDirection * moveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds);
+            world.GetInput();
+            world.Update(gameTime);
 
             enemyManager.Update(gameTime);
 
@@ -72,7 +61,7 @@ namespace Gala
 
             spriteBatch.Begin();
 
-            playerGraphics.Draw(spriteBatch, physics.GetTransform(pk).Position);
+            world.Draw(gameTime, spriteBatch);
             enemyManager.DrawEnemies(spriteBatch);
 
             spriteBatch.End();
