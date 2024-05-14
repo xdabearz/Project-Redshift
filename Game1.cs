@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace Gala
 {
@@ -9,9 +10,9 @@ namespace Gala
     {
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
-        private Texture2D player;
-        private Vector2 playerPosition;
         private EnemyManager enemyManager;
+        private World world;
+        
 
         public Game1()
         {
@@ -22,53 +23,51 @@ namespace Gala
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
             graphics.PreferredBackBufferWidth = 800;
             graphics.PreferredBackBufferHeight = 600;
             graphics.ApplyChanges();
+
+            // This is relative to where the .exe runs from. Will be created on runtime if it doesn't exist
+            world = new World("Data/keybinds.json");
+            world.AddCamera(GraphicsDevice.Viewport);
+
             enemyManager = new EnemyManager(Content.Load<Texture2D>("enemy"));
-            //First is X, second is Y. We subtract 64 from the location because that is the size of the ship (default top left)
-            playerPosition = new Vector2(400-64, 400-64);
+            
             base.Initialize();
         }
 
         // Load initial resources
         protected override void LoadContent()
         {
-            player = Content.Load<Texture2D>("ship");
+            world.CreatePlayer(Content);
+
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            
         }
 
         protected override void Update(GameTime gameTime)
         {
-
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Left) && playerPosition.X > 0)
-            {
-                playerPosition.X -= 5;
-            } else if (Keyboard.GetState().IsKeyDown(Keys.Right) && playerPosition.X < 800-128)
-            {
-                playerPosition.X += 5;
-            }
+            world.GetInput();
+            world.Update(gameTime);
 
             enemyManager.Update(gameTime);
 
             base.Update(gameTime);
         }
 
-        //Draws the initial scene
+        // Draws the initial scene
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
 
-            spriteBatch.Begin();
+            var camera = world.Camera;
+            spriteBatch.Begin(transformMatrix: camera.View * camera.Projection);
 
-            spriteBatch.Draw(player, playerPosition, Color.White);
+            world.Draw(gameTime, spriteBatch);
             enemyManager.DrawEnemies(spriteBatch);
-
+            
             spriteBatch.End();
 
             base.Draw(gameTime);
