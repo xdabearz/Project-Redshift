@@ -1,9 +1,9 @@
-﻿using Gala.Commands;
+﻿using Redshift.Commands;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace Gala
+namespace Redshift
 {
     public class Game1 : Game
     {

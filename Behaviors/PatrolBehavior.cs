@@ -1,8 +1,8 @@
-﻿using Gala.Commands;
+﻿using Redshift.Commands;
 using Microsoft.Xna.Framework;
 using System;
 
-namespace Gala.Behaviors
+namespace Redshift.Behaviors
 {
     internal class PatrolBehavior : Behavior
     {

@@ -1,4 +1,4 @@
-﻿namespace Gala.Systems
+﻿namespace Redshift.Systems
 {
     internal class CollisionSystem
     {

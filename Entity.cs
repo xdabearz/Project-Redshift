@@ -1,6 +1,6 @@
 ﻿using SharpDX.XAudio2;
 
-namespace Gala
+namespace Redshift
 {
     public class Entity
     {

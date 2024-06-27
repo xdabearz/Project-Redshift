@@ -1,7 +1,7 @@
-﻿using Gala.Commands;
+﻿using Redshift.Commands;
 using Microsoft.Xna.Framework;
 
-namespace Gala.Behaviors
+namespace Redshift.Behaviors
 {
     internal enum BehaviorType
     {

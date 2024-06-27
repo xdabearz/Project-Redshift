@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
-namespace Gala
+namespace Redshift
 {
     // Should this just be renamed to Camera and have different modes?
     internal class FollowCamera

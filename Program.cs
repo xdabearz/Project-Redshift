@@ -1,3 +1,3 @@
 ﻿
-using var game = new Gala.Game1();
+using var game = new Redshift.Game1();
 game.Run();

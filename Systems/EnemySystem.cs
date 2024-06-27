@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Gala.Systems
+namespace Redshift.Systems
 {
     internal class EnemySystem
     {

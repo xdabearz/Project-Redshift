@@ -1,5 +1,5 @@
 ﻿
-namespace Gala.Commands
+namespace Redshift.Commands
 {
     internal abstract class Command
     {

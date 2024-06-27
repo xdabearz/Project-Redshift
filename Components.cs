@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Gala
+namespace Redshift
 {
     [Flags] public enum ComponentFlag
     {

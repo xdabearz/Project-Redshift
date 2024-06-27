@@ -1,13 +1,13 @@
-﻿using Gala.Behaviors;
-using Gala.Commands;
-using Gala.Systems;
+﻿using Redshift.Behaviors;
+using Redshift.Commands;
+using Redshift.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 
-namespace Gala
+namespace Redshift
 {
     internal class World
     {

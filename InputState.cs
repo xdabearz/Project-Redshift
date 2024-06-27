@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using System.Text.Json;
 
-namespace Gala
+namespace Redshift
 {
     // InputState holds all the various types of input together
     // For now, this is just mouse and keyboard

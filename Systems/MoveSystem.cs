@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace Gala.Systems
+namespace Redshift.Systems
 {
     public class MoveSystem
     {

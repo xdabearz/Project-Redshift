@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace Gala.Commands
+namespace Redshift.Commands
 {
     internal class MoveCommand : Command
     {
