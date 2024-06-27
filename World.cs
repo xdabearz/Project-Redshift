@@ -1,4 +1,6 @@
-﻿using Gala.Systems;
+﻿using Gala.Behaviors;
+using Gala.Commands;
+using Gala.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,56 +11,91 @@ namespace Gala
 {
     internal class World
     {
-        private EntityManager entityManager;
-        private InputSystem inputSystem;
-        private MoveSystem moveSystem;
+        // Systems & Managers
+        public EntityManager EntityManager { get; private set; }
+
+        public MoveSystem MoveSystem { get; private set; }
+        public EnemySystem EnemySystem { get; private set; }
+        public FollowCamera Camera { get; private set; }
 
         private int playerEntityId;
 
-        // Input stuff
-        private Vector2 moveDirection;
-
         private readonly float moveSpeed = 300; // pixels per second
-        
-        public FollowCamera Camera { get; private set; }
+        private bool enemySpawned;
+        private PatrolBehavior enemyBehavior;
+        private int enemyId;
+        private Queue<Command> commands;
 
-        public World(string filepath)
+        public World()
         {
-            entityManager = new EntityManager();
-            inputSystem = new InputSystem(filepath);
-            moveSystem = new MoveSystem();
-        }
-
-        public void GetInput()
-        {
-            moveDirection = inputSystem.GetMovement();
+            EntityManager = new EntityManager();
+            MoveSystem = new MoveSystem();
+            EnemySystem = new EnemySystem(EntityManager);
+            commands = new();
         }
 
         public void CreatePlayer(ContentManager content)
         {
             // Creating the player entity
-            playerEntityId = entityManager.CreateEntity();
-            entityManager.AddComponent(playerEntityId, ComponentFlag.InputComponent, new InputComponent());
-            entityManager.AddComponent(playerEntityId, ComponentFlag.GraphicComponent, new GraphicComponent
+            playerEntityId = EntityManager.CreateEntity();
+            EntityManager.AddComponent(playerEntityId, ComponentFlag.InputComponent, new InputComponent());
+            EntityManager.AddComponent(playerEntityId, ComponentFlag.GraphicComponent, new GraphicComponent
             {
                 offset = new Vector2(-64, -64),
                 texture = content.Load<Texture2D>("ship")
             });
-            entityManager.AddComponent(playerEntityId, ComponentFlag.TransformComponent, new TransformComponent
+            EntityManager.AddComponent(playerEntityId, ComponentFlag.TransformComponent, new TransformComponent
             {
                 position = new Vector2(400, 400)
             });
         }
 
+        public void QueueInputCommand(Vector2 moveDirection, GameTime gameTime)
+        {
+            // Commands are tightly coupled with world right now, so this probably needs to be revisited
+            commands.Enqueue(new MoveCommand(this, moveDirection * moveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds));
+        }
+
+        public void SpawnEnemy(ContentManager content) 
+        {
+            enemyId = EnemySystem.SpawnEnemy(new Vector2(400, 100), content.Load<Texture2D>("enemy"));
+            enemySpawned = true;
+
+            // Attach a PatrolBehavior to the enemy, but it should likely be done elsewhere (in the enemySystem)
+            BehaviorProperties props = new BehaviorProperties { 
+                EntityId = enemyId,
+                Type = BehaviorType.Repeated,
+                Delay = 0,
+                Priority = 1 
+            };
+
+            // Simple move to the left and right
+            Vector2[] path = new Vector2[2];
+            path[0] = new Vector2(300, 100);
+            path[1] = new Vector2(500, 100);
+
+            enemyBehavior = new PatrolBehavior(props, path, moveSpeed / 3);
+        }
+
         public void Update(GameTime gameTime)
         {
             // Maybe move this outside the update call?
-            List<Entity> moveEntites = entityManager.getMoveEntities();
+            List<Entity> inputEntites = EntityManager.getInputEntities();
 
-            foreach (Entity entity in moveEntites)
+            // The input commands get propagated to all input entities
+            while (commands.Count > 0)
             {
-                moveSystem.ApplyMovement(ref entityManager.GetTransformComponent(entity.Id), moveDirection * moveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds);
+                Command inputCommand = commands.Dequeue();
+                foreach (Entity entity in inputEntites)
+                {
+                    inputCommand.Execute(entity.Id);
+                }
             }
+
+            // This command bypasses the command list because there's no way to
+            // distinguish the input commands from enemy movement commands yet
+            Command enemyMovement = enemyBehavior.Execute(this, gameTime);
+            enemyMovement.Execute(enemyId);
 
             Camera.Update();
         }
@@ -66,12 +103,12 @@ namespace Gala
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             // Maybe move this outside the update call?
-            List<Entity> drawEntites = entityManager.getDrawEntities();
+            List<Entity> drawEntites = EntityManager.getDrawEntities();
 
             foreach (Entity entity in drawEntites)
             {
-                var transform = entityManager.GetTransformComponent(entity.Id);
-                var graphic = entityManager.GetGraphicComponent(entity.Id);
+                var transform = EntityManager.GetTransformComponent(entity.Id);
+                var graphic = EntityManager.GetGraphicComponent(entity.Id);
 
                 spriteBatch.Draw(graphic.texture, transform.position, Color.White);
             }
@@ -79,7 +116,7 @@ namespace Gala
 
         public void AddCamera(Viewport viewport)
         {
-            Camera = new FollowCamera(viewport, playerEntityId, entityManager);
+            Camera = new FollowCamera(viewport, playerEntityId, EntityManager);
         }
     }
 }

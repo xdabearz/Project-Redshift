@@ -4,10 +4,12 @@ using System;
 
 namespace Gala
 {
+    // Should this just be renamed to Camera and have different modes?
     internal class FollowCamera
     {
         private Vector2 position;
         private Vector2 desiredPosition;
+        // Does this need to be hard-coded?
         private float smoothSpeed = 0.1f;
         private int targetId;
         private EntityManager entityManager;
@@ -19,6 +21,7 @@ namespace Gala
         {
             this.targetId = targetId;
             this.entityManager = entityManager;
+            // The projection should be handled differently. Too hard-coded
             Projection = Matrix.CreateTranslation(viewport.Width/2, viewport.Height/2, 0);
             UpdateView();
         }
@@ -32,6 +35,7 @@ namespace Gala
 
         public void UpdateView()
         {
+            // Remove these hard-coded values and put something dynamic instead
             View = Matrix.CreateTranslation(-position.X - 64, -position.Y - 64, 0);
         }
     }

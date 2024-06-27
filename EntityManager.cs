@@ -109,32 +109,47 @@ namespace Gala
 
         public List<Entity> getMoveEntities()
         {
-            List<Entity> moveEntites = new List<Entity>();
+            List<Entity> moveEntities = new();
             ComponentFlag moveFlags = ComponentFlag.InputComponent | ComponentFlag.TransformComponent;
             for (int i = 0; i < activeEntities; i++)
             {
                 if (entities[i].ActiveComponents.HasFlag(moveFlags))
                 {
-                    moveEntites.Add(entities[i]);
+                    moveEntities.Add(entities[i]);
                 }
             }
 
-            return moveEntites;
+            return moveEntities;
         }
 
         public List<Entity> getDrawEntities()
         {
-            List<Entity> drawEntites = new List<Entity>();
+            List<Entity> drawEntities = new();
             ComponentFlag drawFlags = ComponentFlag.GraphicComponent | ComponentFlag.TransformComponent;
             for (int i = 0; i < activeEntities; i++)
             {
                 if (entities[i].ActiveComponents.HasFlag(drawFlags))
                 {
-                    drawEntites.Add(entities[i]);
+                    drawEntities.Add(entities[i]);
                 }
             }
 
-            return drawEntites;
+            return drawEntities;
+        }
+
+        public List<Entity> getInputEntities()
+        {
+            List<Entity> inputEntities = new();
+            ComponentFlag inputFlags = ComponentFlag.InputComponent;
+            for (int i = 0; i < activeEntities; i++)
+            {
+                if (entities[i].ActiveComponents.HasFlag(inputFlags))
+                {
+                    inputEntities.Add(entities[i]);
+                }
+            }
+
+            return inputEntities;
         }
 
         public ref TransformComponent GetTransformComponent(int entityId)

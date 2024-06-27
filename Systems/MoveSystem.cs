@@ -1,6 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
 
 namespace Gala.Systems
 {
@@ -8,6 +6,7 @@ namespace Gala.Systems
     {
         public MoveSystem() { }
 
+        // Make this accept some kind of Action?
         public void ApplyMovement(ref TransformComponent transform, Vector2 movement)
         {
             transform.position += movement;
