@@ -16,6 +16,7 @@ namespace Redshift
 
         public MoveSystem MoveSystem { get; private set; }
         public EnemySystem EnemySystem { get; private set; }
+        public CollisionSystem CollisionSystem { get; private set; }
         public FollowCamera Camera { get; private set; }
 
         private int playerEntityId;
@@ -29,8 +30,9 @@ namespace Redshift
         public World()
         {
             EntityManager = new EntityManager();
-            MoveSystem = new MoveSystem();
+            MoveSystem = new MoveSystem(EntityManager);
             EnemySystem = new EnemySystem(EntityManager);
+            CollisionSystem = new CollisionSystem(EntityManager);
             commands = new();
         }
 
@@ -47,6 +49,10 @@ namespace Redshift
             EntityManager.AddComponent(playerEntityId, ComponentFlag.TransformComponent, new TransformComponent
             {
                 position = new Vector2(400, 400)
+            });
+            EntityManager.AddComponent(playerEntityId, ComponentFlag.BoxCollider, new BoxCollider
+            {
+                collider = new Rectangle(400, 400, 128, 128)
             });
         }
 
@@ -68,6 +74,11 @@ namespace Redshift
                 Delay = 0,
                 Priority = 1 
             };
+
+            EntityManager.AddComponent(enemyId, ComponentFlag.BoxCollider, new BoxCollider
+            {
+                collider = new Rectangle(400, 100, 128, 128)
+            });
 
             // Simple move to the left and right
             Vector2[] path = new Vector2[2];
@@ -96,6 +107,16 @@ namespace Redshift
             // distinguish the input commands from enemy movement commands yet
             Command enemyMovement = enemyBehavior.Execute(this, gameTime);
             enemyMovement.Execute(enemyId);
+
+            // Collision checking after movement
+            List<(Entity, Entity)> collisions = CollisionSystem.CheckCollisions();
+            if (collisions.Count > 0)
+            {
+                foreach(var collision in collisions)
+                {
+                    Console.WriteLine("Entity {0} collided with entity {1}", collision.Item1.Id, collision.Item2.Id);
+                }
+            }
 
             Camera.Update();
         }

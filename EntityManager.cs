@@ -19,6 +19,9 @@ namespace Redshift
         private InputComponent[] inputComponents;
         private int inputComponentCount;
 
+        private BoxCollider[] boxColliders;
+        private int boxColliderCount;
+
         public EntityManager() 
         {
             entities = new Entity[200];
@@ -32,6 +35,9 @@ namespace Redshift
 
             inputComponents = new InputComponent[5];
             inputComponentCount = 0;
+
+            boxColliders = new BoxCollider[50];
+            boxColliderCount = 0;
         }
 
         public int CreateEntity()
@@ -107,6 +113,28 @@ namespace Redshift
             entities[entityId].ComponentIds[componentType] = componentId;
         }
 
+        public void AddComponent(int entityId, ComponentFlag newFlag, BoxCollider collider)
+        {
+            // Need to check for the component already existing for this entity
+
+            int componentType = 0;
+            if (newFlag != ComponentFlag.None)
+            {
+                // The enum counts by powers of 2, so this converts back to a linear count
+                componentType = (int)Math.Log((int)newFlag, 2);
+            }
+
+            // Add the component to the EntityManager array
+            int componentId = boxColliderCount++;
+            boxColliders[componentId] = collider;
+
+            // Set the flag in the Entity
+            entities[entityId].ActiveComponents |= newFlag;
+
+            // Set the created component id in the Entity
+            entities[entityId].ComponentIds[componentType] = componentId;
+        }
+
         public List<Entity> getMoveEntities()
         {
             List<Entity> moveEntities = new();
@@ -152,6 +180,21 @@ namespace Redshift
             return inputEntities;
         }
 
+        public List<Entity> getCollisionEntities()
+        {
+            List<Entity> collisionEntities = new();
+            ComponentFlag collisionFlags = ComponentFlag.TransformComponent | ComponentFlag.BoxCollider;
+            for (int i = 0; i < activeEntities; i++)
+            {
+                if (entities[i].ActiveComponents.HasFlag(collisionFlags))
+                {
+                    collisionEntities.Add(entities[i]);
+                }
+            }
+
+            return collisionEntities;
+        }
+
         public ref TransformComponent GetTransformComponent(int entityId)
         {
             int componentType = (int)Math.Log((int)ComponentFlag.TransformComponent, 2);
@@ -168,6 +211,12 @@ namespace Redshift
         {
             int componentType = (int)Math.Log((int)ComponentFlag.TransformComponent, 2);
             return ref graphicComponents[entities[entityId].ComponentIds[componentType]];
+        }
+
+        public ref BoxCollider GetBoxCollider(int entityId)
+        {
+            int componentType = (int)Math.Log((int)ComponentFlag.BoxCollider, 2);
+            return ref boxColliders[entities[entityId].ComponentIds[componentType]];
         }
     }
 }

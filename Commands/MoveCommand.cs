@@ -9,14 +9,14 @@ namespace Redshift.Commands
 
         public MoveCommand(World world, Vector2 movement) 
         {
-            this.world = world;
             this.movement = movement;
+            this.world = world;
         }
 
         public override void Execute(int entityId)
         {
             // With the entity ID, execute the movement
-            world.MoveSystem.ApplyMovement(ref world.EntityManager.GetTransformComponent(entityId), movement);
+            world.MoveSystem.ApplyMovement(entityId, movement);
         }
     }
 }
