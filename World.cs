@@ -91,7 +91,7 @@ namespace Redshift
         public void Update(GameTime gameTime)
         {
             // Maybe move this outside the update call?
-            List<Entity> inputEntites = EntityManager.getInputEntities();
+            List<Entity> inputEntites = EntityManager.GetEntitiesByFlag(ComponentFlag.InputComponent);
 
             // The input commands get propagated to all input entities
             while (commands.Count > 0)
@@ -124,7 +124,7 @@ namespace Redshift
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             // Maybe move this outside the update call?
-            List<Entity> drawEntites = EntityManager.getDrawEntities();
+            List<Entity> drawEntites = EntityManager.GetEntitiesByFlag(ComponentFlag.GraphicComponent | ComponentFlag.TransformComponent);
 
             foreach (Entity entity in drawEntites)
             {

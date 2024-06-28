@@ -135,64 +135,18 @@ namespace Redshift
             entities[entityId].ComponentIds[componentType] = componentId;
         }
 
-        public List<Entity> getMoveEntities()
+        public List<Entity> GetEntitiesByFlag(ComponentFlag flags)
         {
-            List<Entity> moveEntities = new();
-            ComponentFlag moveFlags = ComponentFlag.InputComponent | ComponentFlag.TransformComponent;
+            List<Entity> matches = new();
             for (int i = 0; i < activeEntities; i++)
             {
-                if (entities[i].ActiveComponents.HasFlag(moveFlags))
+                if (entities[i].ActiveComponents.HasFlag(flags))
                 {
-                    moveEntities.Add(entities[i]);
+                    matches.Add(entities[i]);
                 }
             }
 
-            return moveEntities;
-        }
-
-        public List<Entity> getDrawEntities()
-        {
-            List<Entity> drawEntities = new();
-            ComponentFlag drawFlags = ComponentFlag.GraphicComponent | ComponentFlag.TransformComponent;
-            for (int i = 0; i < activeEntities; i++)
-            {
-                if (entities[i].ActiveComponents.HasFlag(drawFlags))
-                {
-                    drawEntities.Add(entities[i]);
-                }
-            }
-
-            return drawEntities;
-        }
-
-        public List<Entity> getInputEntities()
-        {
-            List<Entity> inputEntities = new();
-            ComponentFlag inputFlags = ComponentFlag.InputComponent;
-            for (int i = 0; i < activeEntities; i++)
-            {
-                if (entities[i].ActiveComponents.HasFlag(inputFlags))
-                {
-                    inputEntities.Add(entities[i]);
-                }
-            }
-
-            return inputEntities;
-        }
-
-        public List<Entity> getCollisionEntities()
-        {
-            List<Entity> collisionEntities = new();
-            ComponentFlag collisionFlags = ComponentFlag.TransformComponent | ComponentFlag.BoxCollider;
-            for (int i = 0; i < activeEntities; i++)
-            {
-                if (entities[i].ActiveComponents.HasFlag(collisionFlags))
-                {
-                    collisionEntities.Add(entities[i]);
-                }
-            }
-
-            return collisionEntities;
+            return matches;
         }
 
         public ref TransformComponent GetTransformComponent(int entityId)

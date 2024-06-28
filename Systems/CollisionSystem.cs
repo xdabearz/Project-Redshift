@@ -19,7 +19,7 @@ namespace Redshift.Systems
             // This is a pretty slow check, runs in O(n^2) time. May want to speed up
             // later with something like a quadtree or uniform grid
 
-            List<Entity> entities = entityManager.getCollisionEntities();
+            List<Entity> entities = entityManager.GetEntitiesByFlag(ComponentFlag.TransformComponent | ComponentFlag.BoxCollider);
 
             for (int i = 0; i < entities.Count; i++)
             {
