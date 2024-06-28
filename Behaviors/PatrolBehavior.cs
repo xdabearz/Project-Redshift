@@ -35,7 +35,7 @@ namespace Redshift.Behaviors
 
         public override Command Execute(World world, GameTime gameTime)
         {
-            var transform = world.EntityManager.GetTransformComponent(EntityId);
+            var transform = world.EntityManager.GetComponent<TransformComponent>(EntityId);
 
             // Move toward the destination node
             Vector2 pathToDestination = pathNodes[destinationNode] - transform.position;

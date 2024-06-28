@@ -28,7 +28,7 @@ namespace Redshift
 
         public void Update()
         {
-            desiredPosition = entityManager.GetTransformComponent(targetId).position;
+            desiredPosition = entityManager.GetComponent<TransformComponent>(targetId).position;
             position = Vector2.Lerp(position, desiredPosition, smoothSpeed);
             UpdateView();
         }

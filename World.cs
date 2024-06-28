@@ -128,8 +128,8 @@ namespace Redshift
 
             foreach (Entity entity in drawEntites)
             {
-                var transform = EntityManager.GetTransformComponent(entity.Id);
-                var graphic = EntityManager.GetGraphicComponent(entity.Id);
+                var transform = EntityManager.GetComponent<TransformComponent>(entity.Id);
+                var graphic = EntityManager.GetComponent<GraphicComponent>(entity.Id);
 
                 spriteBatch.Draw(graphic.texture, transform.position, Color.White);
             }

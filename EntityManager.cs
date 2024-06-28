@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Redshift
 {
@@ -149,28 +150,50 @@ namespace Redshift
             return matches;
         }
 
-        public ref TransformComponent GetTransformComponent(int entityId)
+        // Ref return type must be used here since we are modifying components directly (i.e. mutable)
+        // Alternatives are using classes instead of structs since they are reference types by default
+        // or making the structs immutable and creating/overwriting the original struct each time it 
+        // needs to be updated. Not sure what's best
+        public ref T GetComponent<T>(int entityId) where T : struct
         {
-            int componentType = (int)Math.Log((int)ComponentFlag.TransformComponent, 2);
-            return ref transformComponents[entities[entityId].ComponentIds[componentType]];
+            int componentType = (int)Math.Log((int)getComponentFlag<T>(), 2);
+            int componentId = entities[entityId].ComponentIds[componentType];
+
+            if (typeof(T) == typeof(TransformComponent))
+            {
+                return ref Unsafe.As<TransformComponent, T>(ref transformComponents[componentId]);
+            }
+            else if (typeof(T) == typeof(InputComponent))
+            {
+                return ref Unsafe.As<InputComponent, T>(ref inputComponents[componentId]);
+            }
+            else if (typeof(T) == typeof(GraphicComponent))
+            {
+                return ref Unsafe.As<GraphicComponent, T>(ref graphicComponents[componentId]);
+            }
+            else if (typeof(T) == typeof(BoxCollider))
+            {
+                return ref Unsafe.As<BoxCollider, T>(ref boxColliders[componentId]);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported component type");
+            }
         }
 
-        public ref InputComponent GetInputComponent(int entityId)
+        private ComponentFlag getComponentFlag<T>() where T : struct
         {
-            int componentType = (int)Math.Log((int)ComponentFlag.InputComponent, 2);
-            return ref inputComponents[entities[entityId].ComponentIds[componentType]];
+            if (typeof(T) == typeof(TransformComponent)) return ComponentFlag.TransformComponent;
+            if (typeof(T) == typeof(InputComponent)) return ComponentFlag.InputComponent;
+            if (typeof(T) == typeof(GraphicComponent)) return ComponentFlag.GraphicComponent;
+            if (typeof(T) == typeof(BoxCollider)) return ComponentFlag.BoxCollider;
+
+            throw new InvalidOperationException("Unsupported component type");
         }
 
-        public ref GraphicComponent GetGraphicComponent(int entityId)
+        private ref T getComponentFromArray<T>(ref T[] componentArray, int entityId, int componentType) where T : struct
         {
-            int componentType = (int)Math.Log((int)ComponentFlag.TransformComponent, 2);
-            return ref graphicComponents[entities[entityId].ComponentIds[componentType]];
-        }
-
-        public ref BoxCollider GetBoxCollider(int entityId)
-        {
-            int componentType = (int)Math.Log((int)ComponentFlag.BoxCollider, 2);
-            return ref boxColliders[entities[entityId].ComponentIds[componentType]];
+            return ref componentArray[entities[entityId].ComponentIds[componentType]];
         }
     }
 }

@@ -13,10 +13,11 @@ namespace Redshift.Systems
 
         public void ApplyMovement(int entityId, Vector2 movement)
         {
-            ref TransformComponent transform = ref entityManager.GetTransformComponent(entityId);
+            // Ref types must be used here since we want to update the original, not a copy
+            ref TransformComponent transform = ref entityManager.GetComponent<TransformComponent>(entityId);
             
             // An entity may not have a collider, so need to have this handled better
-            ref BoxCollider collider = ref entityManager.GetBoxCollider(entityId);
+            ref BoxCollider collider = ref entityManager.GetComponent<BoxCollider>(entityId);
 
             transform.position += movement;
 
