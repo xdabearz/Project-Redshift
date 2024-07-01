@@ -39,6 +39,7 @@ namespace Redshift
         {
             world.CreatePlayer(Content);
             world.SpawnEnemy(Content);
+            world.WeaponSystem.LoadBulletTexture(Content.Load<Texture2D>("bullet"));
 
             spriteBatch = new SpriteBatch(GraphicsDevice);
         }
@@ -58,7 +59,13 @@ namespace Redshift
             // where inputEnabled is true
             if (input.Movement.Length() > 0.0f)
             {
-                world.QueueInputCommand(input.Movement, gameTime);
+                world.QueueInputCommand(input.Movement, "Move", gameTime);
+            }
+
+            if (input.CurrentKeyboardState.IsKeyDown(input.GetKeybind("FireWeapon")))
+            {
+                // Yeah, this needs to change. Having to pass the movement even for non-movement commands is bad
+                world.QueueInputCommand(Vector2.Zero, "Shoot", gameTime);
             }
 
             world.Update(gameTime);

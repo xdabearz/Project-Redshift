@@ -17,13 +17,15 @@ namespace Redshift
         public MoveSystem MoveSystem { get; private set; }
         public EnemySystem EnemySystem { get; private set; }
         public CollisionSystem CollisionSystem { get; private set; }
+        public WeaponSystem WeaponSystem { get; private set; }
         public FollowCamera Camera { get; private set; }
+        public GameTime GameTime { get; private set; }
 
         private int playerEntityId;
 
         private readonly float moveSpeed = 300; // pixels per second
         private bool enemySpawned;
-        private PatrolBehavior enemyBehavior;
+        private PathBehavior enemyBehavior;
         private int enemyId;
         private Queue<Command> commands;
 
@@ -33,6 +35,8 @@ namespace Redshift
             MoveSystem = new MoveSystem(EntityManager);
             EnemySystem = new EnemySystem(EntityManager);
             CollisionSystem = new CollisionSystem(EntityManager);
+            WeaponSystem = new WeaponSystem(this, EntityManager);
+            GameTime = new GameTime();
             commands = new();
         }
 
@@ -54,12 +58,27 @@ namespace Redshift
             {
                 collider = new Rectangle(400, 400, 128, 128)
             });
+
+            WeaponSystem.AddWeapon(EntityManager.GetEntityById(playerEntityId), new WeaponDetails
+            {
+                Cooldown = 0.5f,
+                LastFired = -1,
+                Damage = 20,
+                ProjectileSpeed = 1500
+            });
         }
 
-        public void QueueInputCommand(Vector2 moveDirection, GameTime gameTime)
+        public void QueueInputCommand(Vector2 moveDirection, string inputType, GameTime gameTime)
         {
             // Commands are tightly coupled with world right now, so this probably needs to be revisited
-            commands.Enqueue(new MoveCommand(this, moveDirection * moveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds));
+            if (inputType == "Move")
+            {
+                commands.Enqueue(new MoveCommand(this, moveDirection * moveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds));
+            }
+            else if (inputType == "Shoot")
+            {
+                commands.Enqueue(new ShootCommand(this, gameTime));
+            }
         }
 
         public void SpawnEnemy(ContentManager content) 
@@ -67,7 +86,7 @@ namespace Redshift
             enemyId = EnemySystem.SpawnEnemy(new Vector2(400, 100), content.Load<Texture2D>("enemy"));
             enemySpawned = true;
 
-            // Attach a PatrolBehavior to the enemy, but it should likely be done elsewhere (in the enemySystem)
+            // Attach a PatrolBehavior to the enemy, but it should likely be done elsewhere (in the enemySystem?)
             BehaviorProperties props = new BehaviorProperties { 
                 EntityId = enemyId,
                 Type = BehaviorType.Repeated,
@@ -85,11 +104,13 @@ namespace Redshift
             path[0] = new Vector2(300, 100);
             path[1] = new Vector2(500, 100);
 
-            enemyBehavior = new PatrolBehavior(props, path, moveSpeed / 3);
+            enemyBehavior = new PathBehavior(props, path, moveSpeed / 3);
         }
 
         public void Update(GameTime gameTime)
         {
+            GameTime = gameTime;
+
             // Maybe move this outside the update call?
             List<Entity> inputEntites = EntityManager.GetEntitiesByFlag(ComponentFlag.InputComponent);
 
@@ -107,6 +128,13 @@ namespace Redshift
             // distinguish the input commands from enemy movement commands yet
             Command enemyMovement = enemyBehavior.Execute(this, gameTime);
             enemyMovement.Execute(enemyId);
+
+            var shootCommands = WeaponSystem.UpdateProjectiles(gameTime);
+
+            foreach (var shootCommand in shootCommands)
+            {
+                shootCommand.Item1.Execute(shootCommand.Item2.Id);
+            }
 
             // Collision checking after movement
             List<(Entity, Entity)> collisions = CollisionSystem.CheckCollisions();

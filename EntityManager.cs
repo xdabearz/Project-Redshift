@@ -23,6 +23,15 @@ namespace Redshift
         private BoxCollider[] boxColliders;
         private int boxColliderCount;
 
+        private EntityAttributes[] entityAttributes;
+        private int entityAttributesCount;
+
+        private WeaponsList[] weaponsLists;
+        private int weaponsListsCount;
+
+        private WeaponDetails[] weaponDetails;
+        private int weaponDetailsCount;
+
         public EntityManager() 
         {
             entities = new Entity[200];
@@ -39,6 +48,15 @@ namespace Redshift
 
             boxColliders = new BoxCollider[50];
             boxColliderCount = 0;
+
+            entityAttributes = new EntityAttributes[50];
+            entityAttributesCount = 0;
+
+            weaponsLists = new WeaponsList[50];
+            weaponsListsCount = 0;
+
+            weaponDetails = new WeaponDetails[50];
+            weaponDetailsCount = 0;
         }
 
         public int CreateEntity()
@@ -136,6 +154,72 @@ namespace Redshift
             entities[entityId].ComponentIds[componentType] = componentId;
         }
 
+        public void AddComponent(int entityId, ComponentFlag newFlag, EntityAttributes attributes)
+        {
+            // Need to check for the component already existing for this entity
+
+            int componentType = 0;
+            if (newFlag != ComponentFlag.None)
+            {
+                // The enum counts by powers of 2, so this converts back to a linear count
+                componentType = (int)Math.Log((int)newFlag, 2);
+            }
+
+            // Add the component to the EntityManager array
+            int componentId = entityAttributesCount++;
+            entityAttributes[componentId] = attributes;
+
+            // Set the flag in the Entity
+            entities[entityId].ActiveComponents |= newFlag;
+
+            // Set the created component id in the Entity
+            entities[entityId].ComponentIds[componentType] = componentId;
+        }
+
+        public void AddComponent(int entityId, ComponentFlag newFlag, WeaponDetails details)
+        {
+            // Need to check for the component already existing for this entity
+
+            int componentType = 0;
+            if (newFlag != ComponentFlag.None)
+            {
+                // The enum counts by powers of 2, so this converts back to a linear count
+                componentType = (int)Math.Log((int)newFlag, 2);
+            }
+
+            // Add the component to the EntityManager array
+            int componentId = weaponDetailsCount++;
+            weaponDetails[componentId] = details;
+
+            // Set the flag in the Entity
+            entities[entityId].ActiveComponents |= newFlag;
+
+            // Set the created component id in the Entity
+            entities[entityId].ComponentIds[componentType] = componentId;
+        }
+
+        public void AddComponent(int entityId, ComponentFlag newFlag, WeaponsList weapons)
+        {
+            // Need to check for the component already existing for this entity
+
+            int componentType = 0;
+            if (newFlag != ComponentFlag.None)
+            {
+                // The enum counts by powers of 2, so this converts back to a linear count
+                componentType = (int)Math.Log((int)newFlag, 2);
+            }
+
+            // Add the component to the EntityManager array
+            int componentId = weaponsListsCount++;
+            weaponsLists[componentId] = weapons;
+
+            // Set the flag in the Entity
+            entities[entityId].ActiveComponents |= newFlag;
+
+            // Set the created component id in the Entity
+            entities[entityId].ComponentIds[componentType] = componentId;
+        }
+
         public List<Entity> GetEntitiesByFlag(ComponentFlag flags)
         {
             List<Entity> matches = new();
@@ -148,6 +232,11 @@ namespace Redshift
             }
 
             return matches;
+        }
+
+        public Entity GetEntityById(int entityId)
+        {
+            return entities[entityId];
         }
 
         // Ref return type must be used here since we are modifying components directly (i.e. mutable)
@@ -175,6 +264,18 @@ namespace Redshift
             {
                 return ref Unsafe.As<BoxCollider, T>(ref boxColliders[componentId]);
             }
+            else if (typeof(T) == typeof(EntityAttributes))
+            {
+                return ref Unsafe.As<EntityAttributes, T>(ref  entityAttributes[componentId]);
+            }
+            else if (typeof(T) == typeof(WeaponsList))
+            {
+                return ref Unsafe.As<WeaponsList, T>(ref  weaponsLists[componentId]);
+            } 
+            else if (typeof(T) == typeof(WeaponDetails))
+            {
+                return ref Unsafe.As<WeaponDetails, T>(ref weaponDetails[componentId]);
+            } 
             else
             {
                 throw new InvalidOperationException("Unsupported component type");
@@ -187,6 +288,9 @@ namespace Redshift
             if (typeof(T) == typeof(InputComponent)) return ComponentFlag.InputComponent;
             if (typeof(T) == typeof(GraphicComponent)) return ComponentFlag.GraphicComponent;
             if (typeof(T) == typeof(BoxCollider)) return ComponentFlag.BoxCollider;
+            if (typeof(T) == typeof(EntityAttributes)) return ComponentFlag.EntityAttributes;
+            if (typeof(T) == typeof(WeaponsList)) return ComponentFlag.WeaponsList;
+            if (typeof(T) == typeof(WeaponDetails)) return ComponentFlag.WeaponDetails;
 
             throw new InvalidOperationException("Unsupported component type");
         }

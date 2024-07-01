@@ -32,7 +32,6 @@ namespace Redshift
             keybindsFilePath = System.IO.Path.Combine(paths);
             loadKeybinds();
 
-
             CurrentMouseState = new MouseState();
             PreviousMouseState = CurrentMouseState;
 
@@ -59,7 +58,8 @@ namespace Redshift
             if (Keybinds.ContainsKey(action))
             {
                 return Keybinds[action];
-            } else
+            }
+            else
             {
                 return Keys.None;
             }
@@ -117,6 +117,9 @@ namespace Redshift
                 // Access the keybind file
                 string json = System.IO.File.ReadAllText(keybindsFilePath);
                 Keybinds = JsonSerializer.Deserialize<Dictionary<string, Keys>>(json);
+
+                // There should be some sort of check here to verify all keybind actions are present in the keybind
+                // file for when a new action is added
             } catch
             {
                 // File read error, most likely. Set defaults, then save
@@ -125,7 +128,8 @@ namespace Redshift
                     {"MoveUp", Keys.W},
                     {"MoveLeft", Keys.A},
                     {"MoveDown", Keys.S},
-                    {"MoveRight", Keys.D}
+                    {"MoveRight", Keys.D},
+                    {"FireWeapon", Keys.Space}
                 };
 
                 SaveKeybinds();

@@ -4,7 +4,7 @@ using System;
 
 namespace Redshift.Behaviors
 {
-    internal class PatrolBehavior : Behavior
+    internal class PathBehavior : Behavior
     {
         public override int EntityId { get; }
         public override BehaviorType Type { get; }
@@ -16,7 +16,7 @@ namespace Redshift.Behaviors
         private int destinationNode;
 
         // movementSpeed should eventually be moved to a component accessible via the entityId/world
-        public PatrolBehavior(BehaviorProperties properties, Vector2[] pathNodes, float movementSpeed)
+        public PathBehavior(BehaviorProperties properties, Vector2[] pathNodes, float movementSpeed)
         {
             EntityId = properties.EntityId;
             Type = properties.Type;
@@ -57,6 +57,10 @@ namespace Redshift.Behaviors
 
             if (destinationNode >= pathNodes.Length && Type == BehaviorType.Repeated)
                 destinationNode = 0;
+
+            // If end of path reached and limited (for now, all limited = 1) then return null
+            if (destinationNode >= pathNodes.Length && Type == BehaviorType.Limited)
+                return null;
 
             // Delay and Priority are not yet implemented, but they can add more complex behavior in tandem
             // with other behaviors such as making an enemy stop and look around at the end of the path.
