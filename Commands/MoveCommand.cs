@@ -13,10 +13,10 @@ namespace Redshift.Commands
             this.world = world;
         }
 
-        public override void Execute(int entityId)
+        public override void Execute(Entity entity)
         {
             // With the entity ID, execute the movement
-            world.MoveSystem.ApplyMovement(entityId, movement);
+            world.MoveSystem.ApplyMovement(entity, movement);
         }
     }
 }

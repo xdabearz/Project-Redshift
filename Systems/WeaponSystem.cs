@@ -22,7 +22,7 @@ namespace Redshift.Systems
         private List<Behavior> bulletBehaviors;
 
         // This should be moved out to a texture handling system later
-        private Texture2D bullet;
+        private Texture2D bulletTexture;
 
         public WeaponSystem(World world, EntityManager entityManager)
         {
@@ -33,7 +33,7 @@ namespace Redshift.Systems
 
         public void LoadBulletTexture(Texture2D bullet)
         {
-            this.bullet = bullet;
+            this.bulletTexture = bullet;
         }
 
         // This could probably be set up to accept some sort of prefab weapon
@@ -42,12 +42,12 @@ namespace Redshift.Systems
             // This should be changed to allow for multiple weapons using WeaponsList later,
             // but just using a single weapon for now, so it will always be the active one
 
-            entityManager.AddComponent(entity.Id, ComponentFlag.WeaponDetails, details);
+            entityManager.AddComponent(entity, ComponentFlag.WeaponDetails, details);
         }
 
         public void FireWeapon(Entity entity, GameTime currentTime)
         {
-            ref WeaponDetails details = ref entityManager.GetComponent<WeaponDetails>(entity.Id);
+            var details = entityManager.GetComponent<WeaponDetails>(entity);
 
             // If the weapon is on cooldown, we exit the function
             if (details.LastFired > 0 && details.LastFired + details.Cooldown > (float)currentTime.TotalGameTime.TotalSeconds)
@@ -55,7 +55,7 @@ namespace Redshift.Systems
                 return;
             }
 
-            Vector2 origin = entityManager.GetComponent<TransformComponent>(entity.Id).position;
+            Vector2 origin = entityManager.GetComponent<TransformComponent>(entity).Position;
 
             Vector2[] bulletPath =
             {
@@ -64,21 +64,21 @@ namespace Redshift.Systems
             };
 
             // Now create the bullet entity
-            int bulletId = entityManager.CreateEntity();
+            Entity bullet = entityManager.CreateEntity();
 
-            entityManager.AddComponent(bulletId, ComponentFlag.TransformComponent, new TransformComponent
+            entityManager.AddComponent(bullet, ComponentFlag.TransformComponent, new TransformComponent
             {
-                position = origin
+                Position = origin
             });
 
-            entityManager.AddComponent(bulletId, ComponentFlag.GraphicComponent, new GraphicComponent
+            entityManager.AddComponent(bullet, ComponentFlag.GraphicComponent, new GraphicComponent
             {
-                texture = bullet
+                Texture = bulletTexture
             });
 
             BehaviorProperties behaviorProperties = new BehaviorProperties
             {
-                EntityId = bulletId,
+                Entity = bullet,
                 Type = BehaviorType.Limited,
                 Delay = 0,
                 Priority = 1
@@ -100,7 +100,7 @@ namespace Redshift.Systems
                 var command = bulletBehavior.Execute(world, gameTime);
                 if (command != null)
                 {
-                    commands.Add((command, world.EntityManager.GetEntityById(bulletBehavior.EntityId)));
+                    commands.Add((command, world.EntityManager.GetEntityById(bulletBehavior.Entity.Id)));
                 }
                 else
                 {

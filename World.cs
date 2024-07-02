@@ -21,12 +21,12 @@ namespace Redshift
         public FollowCamera Camera { get; private set; }
         public GameTime GameTime { get; private set; }
 
-        private int playerEntityId;
+        private Entity playerEntity;
 
         private readonly float moveSpeed = 300; // pixels per second
         private bool enemySpawned;
         private PathBehavior enemyBehavior;
-        private int enemyId;
+        private Entity enemy;
         private Queue<Command> commands;
 
         public World()
@@ -43,23 +43,23 @@ namespace Redshift
         public void CreatePlayer(ContentManager content)
         {
             // Creating the player entity
-            playerEntityId = EntityManager.CreateEntity();
-            EntityManager.AddComponent(playerEntityId, ComponentFlag.InputComponent, new InputComponent());
-            EntityManager.AddComponent(playerEntityId, ComponentFlag.GraphicComponent, new GraphicComponent
+            playerEntity = EntityManager.CreateEntity();
+            EntityManager.AddComponent(playerEntity, ComponentFlag.InputComponent, new InputComponent());
+            EntityManager.AddComponent(playerEntity, ComponentFlag.GraphicComponent, new GraphicComponent
             {
-                offset = new Vector2(-64, -64),
-                texture = content.Load<Texture2D>("ship")
+                Offset = new Vector2(-64, -64),
+                Texture = content.Load<Texture2D>("ship")
             });
-            EntityManager.AddComponent(playerEntityId, ComponentFlag.TransformComponent, new TransformComponent
+            EntityManager.AddComponent(playerEntity, ComponentFlag.TransformComponent, new TransformComponent
             {
-                position = new Vector2(400, 400)
+                Position = new Vector2(400, 400)
             });
-            EntityManager.AddComponent(playerEntityId, ComponentFlag.BoxCollider, new BoxCollider
+            EntityManager.AddComponent(playerEntity, ComponentFlag.BoxCollider, new BoxCollider
             {
-                collider = new Rectangle(400, 400, 128, 128)
+                Bounds = new Rectangle(400, 400, 128, 128)
             });
 
-            WeaponSystem.AddWeapon(EntityManager.GetEntityById(playerEntityId), new WeaponDetails
+            WeaponSystem.AddWeapon(playerEntity, new WeaponDetails
             {
                 Cooldown = 0.5f,
                 LastFired = -1,
@@ -83,20 +83,20 @@ namespace Redshift
 
         public void SpawnEnemy(ContentManager content) 
         {
-            enemyId = EnemySystem.SpawnEnemy(new Vector2(400, 100), content.Load<Texture2D>("enemy"));
+            enemy = EnemySystem.SpawnEnemy(new Vector2(400, 100), content.Load<Texture2D>("enemy"));
             enemySpawned = true;
 
             // Attach a PatrolBehavior to the enemy, but it should likely be done elsewhere (in the enemySystem?)
             BehaviorProperties props = new BehaviorProperties { 
-                EntityId = enemyId,
+                Entity = enemy,
                 Type = BehaviorType.Repeated,
                 Delay = 0,
                 Priority = 1 
             };
 
-            EntityManager.AddComponent(enemyId, ComponentFlag.BoxCollider, new BoxCollider
+            EntityManager.AddComponent(enemy, ComponentFlag.BoxCollider, new BoxCollider
             {
-                collider = new Rectangle(400, 100, 128, 128)
+                Bounds = new Rectangle(400, 100, 128, 128)
             });
 
             // Simple move to the left and right
@@ -120,20 +120,20 @@ namespace Redshift
                 Command inputCommand = commands.Dequeue();
                 foreach (Entity entity in inputEntites)
                 {
-                    inputCommand.Execute(entity.Id);
+                    inputCommand.Execute(entity);
                 }
             }
 
             // This command bypasses the command list because there's no way to
             // distinguish the input commands from enemy movement commands yet
             Command enemyMovement = enemyBehavior.Execute(this, gameTime);
-            enemyMovement.Execute(enemyId);
+            enemyMovement.Execute(enemy);
 
-            var shootCommands = WeaponSystem.UpdateProjectiles(gameTime);
+            var projectileBehaviors = WeaponSystem.UpdateProjectiles(gameTime);
 
-            foreach (var shootCommand in shootCommands)
+            foreach (var behavior in projectileBehaviors)
             {
-                shootCommand.Item1.Execute(shootCommand.Item2.Id);
+                behavior.Item1.Execute(behavior.Item2);
             }
 
             // Collision checking after movement
@@ -156,16 +156,16 @@ namespace Redshift
 
             foreach (Entity entity in drawEntites)
             {
-                var transform = EntityManager.GetComponent<TransformComponent>(entity.Id);
-                var graphic = EntityManager.GetComponent<GraphicComponent>(entity.Id);
+                var transform = EntityManager.GetComponent<TransformComponent>(entity);
+                var graphic = EntityManager.GetComponent<GraphicComponent>(entity);
 
-                spriteBatch.Draw(graphic.texture, transform.position, Color.White);
+                spriteBatch.Draw(graphic.Texture, transform.Position, Color.White);
             }
         }
 
         public void AddCamera(Viewport viewport)
         {
-            Camera = new FollowCamera(viewport, playerEntityId, EntityManager);
+            Camera = new FollowCamera(viewport, playerEntity, EntityManager);
         }
     }
 }

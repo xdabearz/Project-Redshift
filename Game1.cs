@@ -26,7 +26,6 @@ namespace Redshift
             graphics.ApplyChanges();
 
             world = new World();
-            world.AddCamera(GraphicsDevice.Viewport);
 
             // This is relative to where the .exe runs from. Will be created on runtime if it doesn't exist
             input = new InputState("Data/keybinds.json");
@@ -39,6 +38,7 @@ namespace Redshift
         {
             world.CreatePlayer(Content);
             world.SpawnEnemy(Content);
+            world.AddCamera(GraphicsDevice.Viewport);
             world.WeaponSystem.LoadBulletTexture(Content.Load<Texture2D>("bullet"));
 
             spriteBatch = new SpriteBatch(GraphicsDevice);

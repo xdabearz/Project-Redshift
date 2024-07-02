@@ -11,7 +11,7 @@ namespace Redshift.Behaviors
 
     internal struct BehaviorProperties
     {
-        public int EntityId;
+        public Entity Entity;
         public BehaviorType Type;
         public float Delay;
         public int Priority;
@@ -19,7 +19,7 @@ namespace Redshift.Behaviors
 
     internal abstract class Behavior
     {
-        public abstract int EntityId { get; }
+        public abstract Entity Entity { get; }
         public abstract BehaviorType Type { get; }
         public abstract float Delay { get; }
         public abstract int Priority { get; }

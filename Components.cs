@@ -16,31 +16,36 @@ namespace Redshift
         WeaponDetails = 64,
     }
 
-    public struct GraphicComponent
-    {
-        public Vector2 offset;
-        public Texture2D texture;
+    public abstract class Component 
+    { 
+        // If there is any necessary functionality for all components, it can be added here
     }
 
-    public struct TransformComponent
+    public class GraphicComponent : Component
     {
-        public Vector2 position;
+        public Vector2 Offset;
+        public Texture2D Texture;
+    }
+
+    public class TransformComponent : Component
+    {
+        public Vector2 Position;
     }
 
     // This just flags an entity as reading from the global input
-    public struct InputComponent
+    public class InputComponent : Component
     {
-        public bool enableInput;
+        public bool EnableInput;
     }
 
     // May want to have different collider shapes
     // Anything else for the colliders? Probably need a mask for what it can collide with
-    public struct BoxCollider
+    public class BoxCollider : Component
     {
-        public Rectangle collider;
+        public Rectangle Bounds;
     }
 
-    public struct EntityAttributes
+    public class EntityAttributes : Component
     {
         public float MovementSpeed;
         public int Hitpoints;
@@ -51,13 +56,13 @@ namespace Redshift
     // having a single "parent" for any number of children would be faster, but it would 
     // only be a one-way relationship and would be slow to search for all children from 
     // the parent's perspective
-    public struct WeaponsList
+    public class WeaponsList : Component
     {
         public int[] Active;
         public int[] EntityIds;
     }
 
-    public struct WeaponDetails
+    public class WeaponDetails : Component
     {
         public float Cooldown; // Time between attacks in seconds
         public float LastFired;

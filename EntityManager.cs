@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace Redshift
 {
@@ -11,213 +10,59 @@ namespace Redshift
         private Entity[] entities;
         private int activeEntities;
 
-        private GraphicComponent[] graphicComponents;
-        private int graphicComponentCount;
+        private Component[][] typeArrays;
+        int[] activeCounts;
 
-        private TransformComponent[] transformComponents;
-        private int transformComponentCount;
+        public readonly int ComponentTypeCount;
 
-        private InputComponent[] inputComponents;
-        private int inputComponentCount;
-
-        private BoxCollider[] boxColliders;
-        private int boxColliderCount;
-
-        private EntityAttributes[] entityAttributes;
-        private int entityAttributesCount;
-
-        private WeaponsList[] weaponsLists;
-        private int weaponsListsCount;
-
-        private WeaponDetails[] weaponDetails;
-        private int weaponDetailsCount;
-
-        public EntityManager() 
+        public EntityManager(int maxEntityCount=10000) 
         {
-            entities = new Entity[200];
+            entities = new Entity[maxEntityCount];
             activeEntities = 0;
 
-            graphicComponents = new GraphicComponent[200];
-            graphicComponentCount = 0;
+            // Subtract one to ignore the Component.None default value
+            ComponentTypeCount = Enum.GetNames(typeof(ComponentFlag)).Length - 1;
 
-            transformComponents = new TransformComponent[200];
-            transformComponentCount = 0;
+            // Initialize the arrays
+            typeArrays = new Component[ComponentTypeCount][];
+            activeCounts = new int[ComponentTypeCount];
 
-            inputComponents = new InputComponent[5];
-            inputComponentCount = 0;
-
-            boxColliders = new BoxCollider[50];
-            boxColliderCount = 0;
-
-            entityAttributes = new EntityAttributes[50];
-            entityAttributesCount = 0;
-
-            weaponsLists = new WeaponsList[50];
-            weaponsListsCount = 0;
-
-            weaponDetails = new WeaponDetails[50];
-            weaponDetailsCount = 0;
+            for (int i = 0; i < ComponentTypeCount; i++)
+            {
+                typeArrays[i] = new Component[maxEntityCount];
+                activeCounts[i] = 0;
+            }
         }
 
-        public int CreateEntity()
+        public Entity CreateEntity()
         {
             int id = activeEntities++;
             entities[id] = new Entity(id);
-            return id;
+            return entities[id];
         }
 
-        public void AddComponent(int entityId, ComponentFlag flag, GraphicComponent graphicComponent)
+        public void AddComponent<T>(Entity entity, ComponentFlag flag, T component)
+            where T : Component
         {
             // Need to check for the component already existing for this entity
+            // ComponentFlag can also likely be simplified here
 
-            int componentType = 0;
+            int typeIndex = 0;
             if (flag != ComponentFlag.None)
             {
                 // The enum counts by powers of 2, so this converts back to a linear count
-                componentType = (int)Math.Log((int)flag, 2);
+                typeIndex = (int)Math.Log((int)flag, 2);
             }
 
             // Add the component to the EntityManager array
-            int componentId = graphicComponentCount++;
-            graphicComponents[componentId] = graphicComponent;
+            int componentId = activeCounts[typeIndex]++;
+            typeArrays[typeIndex][componentId] = component;
 
             // Set the flag in the Entity
-            entities[entityId].ActiveComponents |= flag;
+            entities[entity.Id].ActiveComponents |= flag;
 
             // Set the created component id in the Entity
-            entities[entityId].ComponentIds[componentType] = componentId;
-        }
-
-        public void AddComponent(int entityId, ComponentFlag newFlag, TransformComponent transformComponent)
-        {
-            // Need to check for the component already existing for this entity
-
-            int componentType = 0;
-            if (newFlag != ComponentFlag.None)
-            {
-                // The enum counts by powers of 2, so this converts back to a linear count
-                componentType = (int)Math.Log((int)newFlag, 2);
-            }
-
-            // Add the component to the EntityManager array
-            int componentId = transformComponentCount++;
-            transformComponents[componentId] = transformComponent;
-
-            // Set the flag in the Entity
-            entities[entityId].ActiveComponents |= newFlag;
-
-            // Set the created component id in the Entity
-            entities[entityId].ComponentIds[componentType] = componentId;
-        }
-
-        public void AddComponent(int entityId, ComponentFlag newFlag, InputComponent inputComponent)
-        {
-            // Need to check for the component already existing for this entity
-
-            int componentType = 0;
-            if (newFlag != ComponentFlag.None)
-            {
-                // The enum counts by powers of 2, so this converts back to a linear count
-                componentType = (int)Math.Log((int)newFlag, 2);
-            }
-
-            // Add the component to the EntityManager array
-            int componentId = inputComponentCount++;
-            inputComponents[componentId] = inputComponent;
-
-            // Set the flag in the Entity
-            entities[entityId].ActiveComponents |= newFlag;
-
-            // Set the created component id in the Entity
-            entities[entityId].ComponentIds[componentType] = componentId;
-        }
-
-        public void AddComponent(int entityId, ComponentFlag newFlag, BoxCollider collider)
-        {
-            // Need to check for the component already existing for this entity
-
-            int componentType = 0;
-            if (newFlag != ComponentFlag.None)
-            {
-                // The enum counts by powers of 2, so this converts back to a linear count
-                componentType = (int)Math.Log((int)newFlag, 2);
-            }
-
-            // Add the component to the EntityManager array
-            int componentId = boxColliderCount++;
-            boxColliders[componentId] = collider;
-
-            // Set the flag in the Entity
-            entities[entityId].ActiveComponents |= newFlag;
-
-            // Set the created component id in the Entity
-            entities[entityId].ComponentIds[componentType] = componentId;
-        }
-
-        public void AddComponent(int entityId, ComponentFlag newFlag, EntityAttributes attributes)
-        {
-            // Need to check for the component already existing for this entity
-
-            int componentType = 0;
-            if (newFlag != ComponentFlag.None)
-            {
-                // The enum counts by powers of 2, so this converts back to a linear count
-                componentType = (int)Math.Log((int)newFlag, 2);
-            }
-
-            // Add the component to the EntityManager array
-            int componentId = entityAttributesCount++;
-            entityAttributes[componentId] = attributes;
-
-            // Set the flag in the Entity
-            entities[entityId].ActiveComponents |= newFlag;
-
-            // Set the created component id in the Entity
-            entities[entityId].ComponentIds[componentType] = componentId;
-        }
-
-        public void AddComponent(int entityId, ComponentFlag newFlag, WeaponDetails details)
-        {
-            // Need to check for the component already existing for this entity
-
-            int componentType = 0;
-            if (newFlag != ComponentFlag.None)
-            {
-                // The enum counts by powers of 2, so this converts back to a linear count
-                componentType = (int)Math.Log((int)newFlag, 2);
-            }
-
-            // Add the component to the EntityManager array
-            int componentId = weaponDetailsCount++;
-            weaponDetails[componentId] = details;
-
-            // Set the flag in the Entity
-            entities[entityId].ActiveComponents |= newFlag;
-
-            // Set the created component id in the Entity
-            entities[entityId].ComponentIds[componentType] = componentId;
-        }
-
-        public void AddComponent(int entityId, ComponentFlag newFlag, WeaponsList weapons)
-        {
-            // Need to check for the component already existing for this entity
-
-            int componentType = 0;
-            if (newFlag != ComponentFlag.None)
-            {
-                // The enum counts by powers of 2, so this converts back to a linear count
-                componentType = (int)Math.Log((int)newFlag, 2);
-            }
-
-            // Add the component to the EntityManager array
-            int componentId = weaponsListsCount++;
-            weaponsLists[componentId] = weapons;
-
-            // Set the flag in the Entity
-            entities[entityId].ActiveComponents |= newFlag;
-
-            // Set the created component id in the Entity
-            entities[entityId].ComponentIds[componentType] = componentId;
+            entities[entity.Id].ComponentIds[typeIndex] = componentId;
         }
 
         public List<Entity> GetEntitiesByFlag(ComponentFlag flags)
@@ -239,50 +84,28 @@ namespace Redshift
             return entities[entityId];
         }
 
-        // Ref return type must be used here since we are modifying components directly (i.e. mutable)
-        // Alternatives are using classes instead of structs since they are reference types by default
-        // or making the structs immutable and creating/overwriting the original struct each time it 
-        // needs to be updated. Not sure what's best
-        public ref T GetComponent<T>(int entityId) where T : struct
+        public T GetComponent<T>(Entity entity)
+            where T : Component
         {
-            int componentType = (int)Math.Log((int)getComponentFlag<T>(), 2);
-            int componentId = entities[entityId].ComponentIds[componentType];
+            ComponentFlag flag = getComponentFlag<T>();
 
-            if (typeof(T) == typeof(TransformComponent))
+            // The component type is not active for this entity
+            if (!entities[entity.Id].ActiveComponents.HasFlag(flag))
+                return null;
+
+            int typeIndex = (int)Math.Log((int)flag, 2);
+            int componentId = entities[entity.Id].ComponentIds[typeIndex];
+
+            if (typeArrays[typeIndex][componentId] is T component)
             {
-                return ref Unsafe.As<TransformComponent, T>(ref transformComponents[componentId]);
+                return component;
             }
-            else if (typeof(T) == typeof(InputComponent))
-            {
-                return ref Unsafe.As<InputComponent, T>(ref inputComponents[componentId]);
-            }
-            else if (typeof(T) == typeof(GraphicComponent))
-            {
-                return ref Unsafe.As<GraphicComponent, T>(ref graphicComponents[componentId]);
-            }
-            else if (typeof(T) == typeof(BoxCollider))
-            {
-                return ref Unsafe.As<BoxCollider, T>(ref boxColliders[componentId]);
-            }
-            else if (typeof(T) == typeof(EntityAttributes))
-            {
-                return ref Unsafe.As<EntityAttributes, T>(ref  entityAttributes[componentId]);
-            }
-            else if (typeof(T) == typeof(WeaponsList))
-            {
-                return ref Unsafe.As<WeaponsList, T>(ref  weaponsLists[componentId]);
-            } 
-            else if (typeof(T) == typeof(WeaponDetails))
-            {
-                return ref Unsafe.As<WeaponDetails, T>(ref weaponDetails[componentId]);
-            } 
-            else
-            {
-                throw new InvalidOperationException("Unsupported component type");
-            }
+
+            return null;
         }
 
-        private ComponentFlag getComponentFlag<T>() where T : struct
+        private ComponentFlag getComponentFlag<T>() 
+            where T : Component
         {
             if (typeof(T) == typeof(TransformComponent)) return ComponentFlag.TransformComponent;
             if (typeof(T) == typeof(InputComponent)) return ComponentFlag.InputComponent;
@@ -293,11 +116,6 @@ namespace Redshift
             if (typeof(T) == typeof(WeaponDetails)) return ComponentFlag.WeaponDetails;
 
             throw new InvalidOperationException("Unsupported component type");
-        }
-
-        private ref T getComponentFromArray<T>(ref T[] componentArray, int entityId, int componentType) where T : struct
-        {
-            return ref componentArray[entities[entityId].ComponentIds[componentType]];
         }
     }
 }

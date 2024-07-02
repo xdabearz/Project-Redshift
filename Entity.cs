@@ -1,6 +1,4 @@
-﻿using SharpDX.XAudio2;
-
-namespace Redshift
+﻿namespace Redshift
 {
     public class Entity
     {

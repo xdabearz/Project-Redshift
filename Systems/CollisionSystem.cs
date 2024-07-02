@@ -23,16 +23,16 @@ namespace Redshift.Systems
 
             for (int i = 0; i < entities.Count; i++)
             {
-                var colliderA = entityManager.GetComponent<BoxCollider>(entities[i].Id);
+                var colliderA = entityManager.GetComponent<BoxCollider>(entities[i]);
                 for (int j = i + 1; j < entities.Count; j++)
                 {
                     // Don't check for collisions with itself
                     if (entities[i].Id == entities[j].Id)
                         continue;
 
-                    var colliderB = entityManager.GetComponent<BoxCollider>(entities[j].Id);
+                    var colliderB = entityManager.GetComponent<BoxCollider>(entities[j]);
 
-                    if (colliderA.collider.Intersects(colliderB.collider))
+                    if (colliderA.Bounds.Intersects(colliderB.Bounds))
                         collisions.Add((entities[i], entities[j]));
                 }
             }

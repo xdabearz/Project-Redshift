@@ -11,15 +11,15 @@ namespace Redshift
         private Vector2 desiredPosition;
         // Does this need to be hard-coded?
         private float smoothSpeed = 0.1f;
-        private int targetId;
+        private Entity target;
         private EntityManager entityManager;
 
         public Matrix View { get; private set; }
         public Matrix Projection { get; private set; }
 
-        public FollowCamera(Viewport viewport, int targetId, EntityManager entityManager)
+        public FollowCamera(Viewport viewport, Entity entity, EntityManager entityManager)
         {
-            this.targetId = targetId;
+            this.target = entity;
             this.entityManager = entityManager;
             // The projection should be handled differently. Too hard-coded
             Projection = Matrix.CreateTranslation(viewport.Width/2, viewport.Height/2, 0);
@@ -28,7 +28,7 @@ namespace Redshift
 
         public void Update()
         {
-            desiredPosition = entityManager.GetComponent<TransformComponent>(targetId).position;
+            desiredPosition = entityManager.GetComponent<TransformComponent>(target).Position;
             position = Vector2.Lerp(position, desiredPosition, smoothSpeed);
             UpdateView();
         }
