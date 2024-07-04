@@ -42,7 +42,7 @@ namespace Redshift.Systems
             // This should be changed to allow for multiple weapons using WeaponsList later,
             // but just using a single weapon for now, so it will always be the active one
 
-            entityManager.AddComponent(entity, ComponentFlag.WeaponDetails, details);
+            entityManager.AddComponent<WeaponDetails>(entity, details);
         }
 
         public void FireWeapon(Entity entity, GameTime currentTime)
@@ -66,14 +66,19 @@ namespace Redshift.Systems
             // Now create the bullet entity
             Entity bullet = entityManager.CreateEntity();
 
-            entityManager.AddComponent(bullet, ComponentFlag.TransformComponent, new TransformComponent
+            entityManager.AddComponent<TransformComponent>(bullet, new TransformComponent
             {
                 Position = origin
             });
 
-            entityManager.AddComponent(bullet, ComponentFlag.GraphicComponent, new GraphicComponent
+            entityManager.AddComponent<GraphicComponent>(bullet, new GraphicComponent
             {
                 Texture = bulletTexture
+            });
+
+            entityManager.AddComponent<BoxCollider>(bullet, new BoxCollider
+            {
+                Bounds = new Rectangle(origin.ToPoint(), bulletTexture.Bounds.Size),
             });
 
             BehaviorProperties behaviorProperties = new BehaviorProperties

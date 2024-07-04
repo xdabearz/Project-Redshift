@@ -44,17 +44,17 @@ namespace Redshift
         {
             // Creating the player entity
             playerEntity = EntityManager.CreateEntity();
-            EntityManager.AddComponent(playerEntity, ComponentFlag.InputComponent, new InputComponent());
-            EntityManager.AddComponent(playerEntity, ComponentFlag.GraphicComponent, new GraphicComponent
+            EntityManager.AddComponent<InputComponent>(playerEntity, new InputComponent());
+            EntityManager.AddComponent<GraphicComponent>(playerEntity, new GraphicComponent
             {
                 Offset = new Vector2(-64, -64),
                 Texture = content.Load<Texture2D>("ship")
             });
-            EntityManager.AddComponent(playerEntity, ComponentFlag.TransformComponent, new TransformComponent
+            EntityManager.AddComponent<TransformComponent>(playerEntity, new TransformComponent
             {
                 Position = new Vector2(400, 400)
             });
-            EntityManager.AddComponent(playerEntity, ComponentFlag.BoxCollider, new BoxCollider
+            EntityManager.AddComponent<BoxCollider>(playerEntity, new BoxCollider
             {
                 Bounds = new Rectangle(400, 400, 128, 128)
             });
@@ -94,7 +94,7 @@ namespace Redshift
                 Priority = 1 
             };
 
-            EntityManager.AddComponent(enemy, ComponentFlag.BoxCollider, new BoxCollider
+            EntityManager.AddComponent<BoxCollider>(enemy, new BoxCollider
             {
                 Bounds = new Rectangle(400, 100, 128, 128)
             });
@@ -142,10 +142,14 @@ namespace Redshift
             {
                 foreach(var collision in collisions)
                 {
+                    if (collision.Item1.Id == 1)
+                        EntityManager.DeleteEntity(collision.Item2);
+
                     Console.WriteLine("Entity {0} collided with entity {1}", collision.Item1.Id, collision.Item2.Id);
                 }
             }
 
+            EntityManager.CleanupEntities();
             Camera.Update();
         }
 

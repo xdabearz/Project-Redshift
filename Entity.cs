@@ -2,6 +2,7 @@
 {
     public class Entity
     {
+        public bool Enabled { get; set; }
         public int Id { get; }
         public ComponentFlag ActiveComponents { get; set; }
         public int[] ComponentIds { get; }

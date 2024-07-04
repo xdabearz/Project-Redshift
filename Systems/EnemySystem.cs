@@ -18,12 +18,12 @@ namespace Redshift.Systems
             // Add an entity with some commands from the entity manager
             Entity entity = entityManager.CreateEntity();
 
-            entityManager.AddComponent(entity, ComponentFlag.TransformComponent, new TransformComponent
+            entityManager.AddComponent<TransformComponent>(entity, new TransformComponent
             {
                 Position = spawnLocation
             });
             
-            entityManager.AddComponent(entity, ComponentFlag.GraphicComponent, new GraphicComponent
+            entityManager.AddComponent<GraphicComponent>(entity, new GraphicComponent
             {
                 Offset = new Vector2(0, 0),
                 Texture = texture

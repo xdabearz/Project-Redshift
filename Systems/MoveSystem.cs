@@ -20,8 +20,7 @@ namespace Redshift.Systems
             transform.Position += movement;
 
             // Moves the collider (if there is one) to match the transform movement
-            if (collider != null)
-                collider.Bounds.Offset(movement);
+            collider?.Bounds.Offset(movement);
         }
     }
 }

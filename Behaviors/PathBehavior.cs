@@ -38,6 +38,9 @@ namespace Redshift.Behaviors
         {
             var transform = world.EntityManager.GetComponent<TransformComponent>(Entity);
 
+            if (transform == null)
+                return null;
+
             // Move toward the destination node
             Vector2 pathToDestination = pathNodes[destinationNode] - transform.Position;
             float moveDistance = movementSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
