@@ -59,7 +59,6 @@ namespace Redshift.Systems
 
             Vector2[] bulletPath =
             {
-                 origin,
                  origin + new Vector2(0, -1000) // Move up 1000 pixels and stop
             };
 
@@ -76,9 +75,11 @@ namespace Redshift.Systems
                 Texture = bulletTexture
             });
 
-            entityManager.AddComponent<BoxCollider>(bullet, new BoxCollider
+            entityManager.AddComponent<Collider>(bullet, new Collider
             {
                 Bounds = new Rectangle(origin.ToPoint(), bulletTexture.Bounds.Size),
+                Layer = CollisionLayer.Projectile,
+                CollidesWith = CollisionLayer.Enemy | CollisionLayer.Environment
             });
 
             BehaviorProperties behaviorProperties = new BehaviorProperties
@@ -86,41 +87,15 @@ namespace Redshift.Systems
                 Entity = bullet,
                 Type = BehaviorType.Limited,
                 Delay = 0,
-                Priority = 1
+                Priority = 1,
+                Limit = 1
             };
 
             PathBehavior bulletBehavior = new PathBehavior(behaviorProperties, bulletPath, details.ProjectileSpeed);
-            bulletBehaviors.Add(bulletBehavior);
+            
+            world.BehaviorSystem.AddBehavior(bullet, bulletBehavior);
 
             details.LastFired = (float)currentTime.TotalGameTime.TotalSeconds;
-        }
-
-        public List<(Command, Entity)> UpdateProjectiles(GameTime gameTime)
-        {
-            List<(Command, Entity)> commands = new();
-            List<PathBehavior> deleteBehaviors = new();
-
-            foreach (PathBehavior bulletBehavior in bulletBehaviors)
-            {
-                var command = bulletBehavior.Execute(world, gameTime);
-                if (command != null)
-                {
-                    commands.Add((command, world.EntityManager.GetEntityById(bulletBehavior.Entity.Id)));
-                }
-                else
-                {
-                    // Bullet reached the end of its path, flag for deletion after this loop
-                    deleteBehaviors.Add(bulletBehavior);
-                }
-            }
-
-            // Now delete them all
-            foreach (PathBehavior bulletBehavior in deleteBehaviors)
-            {
-                bulletBehaviors.Remove(bulletBehavior);
-            }
-
-            return commands;
         }
     }
 }

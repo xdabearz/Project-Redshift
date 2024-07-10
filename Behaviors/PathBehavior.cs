@@ -6,24 +6,14 @@ namespace Redshift.Behaviors
 {
     internal class PathBehavior : Behavior
     {
-        public override Entity Entity { get; }
-        public override BehaviorType Type { get; }
-        public override float Delay { get; }
-        public override int Priority { get; }
-
         private readonly float movementSpeed;
         private readonly Vector2[] pathNodes;
 
         private int destinationNode;
 
         // movementSpeed should eventually be moved to a component accessible via the entityId/world
-        public PathBehavior(BehaviorProperties properties, Vector2[] pathNodes, float movementSpeed)
+        public PathBehavior(BehaviorProperties properties, Vector2[] pathNodes, float movementSpeed) : base(properties)
         {
-            Entity = properties.Entity;
-            Type = properties.Type;
-            Delay = properties.Delay;
-            Priority = properties.Priority;
-
             this.movementSpeed = movementSpeed;
 
             // Sanity check that there are actually nodes in the path
@@ -36,6 +26,9 @@ namespace Redshift.Behaviors
 
         public override Command Execute(World world, GameTime gameTime)
         {
+            if (Type == BehaviorType.Limited && Completions >= Limit)
+                return null;
+
             var transform = world.EntityManager.GetComponent<TransformComponent>(Entity);
 
             if (transform == null)
@@ -62,9 +55,9 @@ namespace Redshift.Behaviors
             if (destinationNode >= pathNodes.Length && Type == BehaviorType.Repeated)
                 destinationNode = 0;
 
-            // If end of path reached and limited (for now, all limited = 1) then return null
+            // If end of path reached and limited, increase completions
             if (destinationNode >= pathNodes.Length && Type == BehaviorType.Limited)
-                return null;
+                Completions++;
 
             // Delay and Priority are not yet implemented, but they can add more complex behavior in tandem
             // with other behaviors such as making an enemy stop and look around at the end of the path.

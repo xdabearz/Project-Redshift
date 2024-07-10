@@ -2,7 +2,7 @@
 
 namespace Redshift.Systems
 {
-    public class MoveSystem
+    internal class MoveSystem
     {
         private readonly EntityManager entityManager;
 
@@ -15,7 +15,7 @@ namespace Redshift.Systems
         {
             var transform = entityManager.GetComponent<TransformComponent>(entity);
             
-            var collider = entityManager.GetComponent<BoxCollider>(entity);
+            var collider = entityManager.GetComponent<Collider>(entity);
 
             transform.Position += movement;
 

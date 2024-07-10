@@ -15,7 +15,7 @@ namespace Redshift.Commands
 
         public override void Execute(Entity entity)
         {
-            world.WeaponSystem.FireWeapon(world.EntityManager.GetEntityById(entity.Id), gameTime);
+            world.WeaponSystem.FireWeapon(entity, gameTime);
         }
     }
 }

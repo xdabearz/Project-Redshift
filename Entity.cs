@@ -1,6 +1,6 @@
 ﻿namespace Redshift
 {
-    public class Entity
+    internal class Entity
     {
         public bool Enabled { get; set; }
         public int Id { get; }

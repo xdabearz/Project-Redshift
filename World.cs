@@ -18,6 +18,7 @@ namespace Redshift
         public EnemySystem EnemySystem { get; private set; }
         public CollisionSystem CollisionSystem { get; private set; }
         public WeaponSystem WeaponSystem { get; private set; }
+        public BehaviorSystem BehaviorSystem { get; private set; }
         public FollowCamera Camera { get; private set; }
         public GameTime GameTime { get; private set; }
 
@@ -36,6 +37,8 @@ namespace Redshift
             EnemySystem = new EnemySystem(EntityManager);
             CollisionSystem = new CollisionSystem(EntityManager);
             WeaponSystem = new WeaponSystem(this, EntityManager);
+            BehaviorSystem = new BehaviorSystem(this, EntityManager);
+
             GameTime = new GameTime();
             commands = new();
         }
@@ -54,9 +57,11 @@ namespace Redshift
             {
                 Position = new Vector2(400, 400)
             });
-            EntityManager.AddComponent<BoxCollider>(playerEntity, new BoxCollider
+            EntityManager.AddComponent<Collider>(playerEntity, new Collider
             {
-                Bounds = new Rectangle(400, 400, 128, 128)
+                Bounds = new Rectangle(400, 400, 128, 128),
+                Layer = CollisionLayer.Player,
+                CollidesWith = CollisionLayer.Enemy | CollisionLayer.Environment
             });
 
             WeaponSystem.AddWeapon(playerEntity, new WeaponDetails
@@ -87,16 +92,19 @@ namespace Redshift
             enemySpawned = true;
 
             // Attach a PatrolBehavior to the enemy, but it should likely be done elsewhere (in the enemySystem?)
-            BehaviorProperties props = new BehaviorProperties { 
+            BehaviorProperties props = new BehaviorProperties
+            {
                 Entity = enemy,
                 Type = BehaviorType.Repeated,
                 Delay = 0,
-                Priority = 1 
+                Priority = 1
             };
 
-            EntityManager.AddComponent<BoxCollider>(enemy, new BoxCollider
+            EntityManager.AddComponent<Collider>(enemy, new Collider
             {
-                Bounds = new Rectangle(400, 100, 128, 128)
+                Bounds = new Rectangle(400, 100, 128, 128),
+                Layer = CollisionLayer.Enemy,
+                CollidesWith = CollisionLayer.Player | CollisionLayer.Projectile
             });
 
             // Simple move to the left and right
@@ -104,7 +112,7 @@ namespace Redshift
             path[0] = new Vector2(300, 100);
             path[1] = new Vector2(500, 100);
 
-            enemyBehavior = new PathBehavior(props, path, moveSpeed / 3);
+            BehaviorSystem.AddBehavior(enemy, new PathBehavior(props, path, moveSpeed / 3));
         }
 
         public void Update(GameTime gameTime)
@@ -124,17 +132,7 @@ namespace Redshift
                 }
             }
 
-            // This command bypasses the command list because there's no way to
-            // distinguish the input commands from enemy movement commands yet
-            Command enemyMovement = enemyBehavior.Execute(this, gameTime);
-            enemyMovement.Execute(enemy);
-
-            var projectileBehaviors = WeaponSystem.UpdateProjectiles(gameTime);
-
-            foreach (var behavior in projectileBehaviors)
-            {
-                behavior.Item1.Execute(behavior.Item2);
-            }
+            BehaviorSystem.RunBehaviors(gameTime);
 
             // Collision checking after movement
             List<(Entity, Entity)> collisions = CollisionSystem.CheckCollisions();

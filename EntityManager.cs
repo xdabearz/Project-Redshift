@@ -5,17 +5,17 @@ using System.Runtime.CompilerServices;
 
 namespace Redshift
 {
-    public class EntityManager
+    internal class EntityManager
     {
-        // Entities are an identifier, a bitmask of components, and a position
-        // for each of those components within their respective arrays
+        // Entities
         private Dictionary<int, Entity> entities;
         private List<int> recycledEntityIds;
         private int activeEntities;
 
-        private Dictionary<int, Component>[] typeArrays;
+        // Components
+        private Dictionary<int, Component>[] components;
         private List<int>[] recycledComponentIds;
-        private int[] activeCounts;
+        private int[] componentCounts;
 
         private List<Entity> entitiesToDelete;
 
@@ -31,15 +31,15 @@ namespace Redshift
             ComponentTypeCount = Enum.GetNames(typeof(ComponentFlag)).Length - 1;
 
             // Initialize the arrays
-            typeArrays = new Dictionary<int, Component>[ComponentTypeCount];
+            components = new Dictionary<int, Component>[ComponentTypeCount];
             recycledComponentIds = new List<int>[ComponentTypeCount];
-            activeCounts = new int[ComponentTypeCount];
+            componentCounts = new int[ComponentTypeCount];
 
             for (int i = 0; i < ComponentTypeCount; i++)
             {
-                typeArrays[i] = new Dictionary<int, Component>();
+                components[i] = new Dictionary<int, Component>();
                 recycledComponentIds[i] = new List<int>();
-                activeCounts[i] = 0;
+                componentCounts[i] = 0;
             }
 
             entitiesToDelete = new();
@@ -57,7 +57,7 @@ namespace Redshift
             {
                 id = activeEntities++;
             }
-            entities[id] = new Entity(id);
+            entities.Add(id, new Entity(id));
             return entities[id];
         }
 
@@ -79,13 +79,13 @@ namespace Redshift
             if (recycledComponentIds[typeIndex].Count > 0)
             {
                 componentId = recycledComponentIds[typeIndex][0];
-                recycledComponentIds[typeIndex].Remove(0);
+                recycledComponentIds[typeIndex].RemoveAt(0);
             }
             else
             {
-                componentId = activeCounts[typeIndex]++;
+                componentId = componentCounts[typeIndex]++;
             }
-            typeArrays[typeIndex][componentId] = component;
+            components[typeIndex][componentId] = component;
 
             // Set the flag in the Entity
             entities[entity.Id].ActiveComponents |= flag;
@@ -116,7 +116,7 @@ namespace Redshift
                     int componentId = entity.ComponentIds[i];
                     if (entity.ActiveComponents.HasFlag(flag))
                     {
-                        typeArrays[i].Remove(componentId);
+                        components[i].Remove(componentId);
                         recycledComponentIds[i].Add(componentId);
                     }
                 }
@@ -164,7 +164,7 @@ namespace Redshift
             int typeIndex = (int)Math.Log((int)flag, 2);
             int componentId = entities[entity.Id].ComponentIds[typeIndex];
 
-            if (typeArrays[typeIndex][componentId] is T component)
+            if (components[typeIndex][componentId] is T component)
             {
                 return component;
             }
@@ -176,14 +176,14 @@ namespace Redshift
             where T : Component
         {
             if (typeof(T) == typeof(TransformComponent)) return ComponentFlag.TransformComponent;
-            if (typeof(T) == typeof(InputComponent)) return ComponentFlag.InputComponent;
-            if (typeof(T) == typeof(GraphicComponent)) return ComponentFlag.GraphicComponent;
-            if (typeof(T) == typeof(BoxCollider)) return ComponentFlag.BoxCollider;
-            if (typeof(T) == typeof(EntityAttributes)) return ComponentFlag.EntityAttributes;
-            if (typeof(T) == typeof(WeaponsList)) return ComponentFlag.WeaponsList;
-            if (typeof(T) == typeof(WeaponDetails)) return ComponentFlag.WeaponDetails;
-
-            throw new InvalidOperationException("Unsupported component type");
+            else if (typeof(T) == typeof(InputComponent)) return ComponentFlag.InputComponent;
+            else if (typeof(T) == typeof(GraphicComponent)) return ComponentFlag.GraphicComponent;
+            else if (typeof(T) == typeof(Collider)) return ComponentFlag.Collider;
+            else if (typeof(T) == typeof(EntityAttributes)) return ComponentFlag.EntityAttributes;
+            else if (typeof(T) == typeof(WeaponsList)) return ComponentFlag.WeaponsList;
+            else if (typeof(T) == typeof(WeaponDetails)) return ComponentFlag.WeaponDetails;
+            else if (typeof(T) == typeof(AIBehaviorComponent)) return ComponentFlag.AIBehaviorComponent;
+            else throw new InvalidOperationException("Unsupported component type");
         }
     }
 }
