@@ -50,12 +50,15 @@ namespace Redshift
         Environment = 1 << 3,
     }
 
+    internal delegate void HandleCollision(Entity entity);
+
     // May want to have different collider shapes
     internal class Collider : Component
     {
         public Rectangle Bounds;
         public CollisionLayer Layer;
         public CollisionLayer CollidesWith;
+        public HandleCollision HandleCollision;
     }
 
     internal class EntityAttributes : Component

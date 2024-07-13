@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using Redshift.Behaviors;
 using Microsoft.Xna.Framework;
-using Redshift.Commands;
-using System;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace Redshift.Systems
 {
@@ -79,7 +78,21 @@ namespace Redshift.Systems
             {
                 Bounds = new Rectangle(origin.ToPoint(), bulletTexture.Bounds.Size),
                 Layer = CollisionLayer.Projectile,
-                CollidesWith = CollisionLayer.Enemy | CollisionLayer.Environment
+                CollidesWith = CollisionLayer.Enemy | CollisionLayer.Environment,
+                HandleCollision = (Entity entity) =>
+                {
+                    var entityStats = entityManager.GetComponent<EntityAttributes>(entity);
+
+                    if (entityStats != null)
+                    {
+                        entityStats.Hitpoints -= (int)details.Damage;
+                        if (entityStats.Hitpoints <= 0)
+                        {
+                            entityManager.DeleteEntity(entity);
+                        }
+                    }
+                    entityManager.DeleteEntity(bullet);
+                }
             });
 
             BehaviorProperties behaviorProperties = new BehaviorProperties
@@ -88,7 +101,8 @@ namespace Redshift.Systems
                 Type = BehaviorType.Limited,
                 Delay = 0,
                 Priority = 1,
-                Limit = 1
+                Limit = 1,
+                Callback = () => { entityManager.DeleteEntity(bullet); }
             };
 
             PathBehavior bulletBehavior = new PathBehavior(behaviorProperties, bulletPath, details.ProjectileSpeed);
@@ -97,5 +111,7 @@ namespace Redshift.Systems
 
             details.LastFired = (float)currentTime.TotalGameTime.TotalSeconds;
         }
+
+        private delegate void BulletCollision(Entity entity);
     }
 }

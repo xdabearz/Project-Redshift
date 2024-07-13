@@ -40,10 +40,10 @@ namespace Redshift.Systems
 
             foreach (var entity in entities)
             {
-                var behaviorComponet = entityManager.GetComponent<AIBehaviorComponent>(entity);
+                var behaviorComponent = entityManager.GetComponent<AIBehaviorComponent>(entity);
 
                 // This can have more complex selection logic based on priority, etc
-                foreach (var behavior in behaviorComponet.Behaviors)
+                foreach (var behavior in behaviorComponent.Behaviors)
                 {
                     var command = behavior.Execute(world, gameTime);
 

@@ -61,7 +61,8 @@ namespace Redshift
             {
                 Bounds = new Rectangle(400, 1000, 128, 128),
                 Layer = CollisionLayer.Player,
-                CollidesWith = CollisionLayer.Enemy | CollisionLayer.Environment
+                CollidesWith = CollisionLayer.Enemy | CollisionLayer.Environment,
+                HandleCollision = null
             });
 
             WeaponSystem.AddWeapon(playerEntity, new WeaponDetails
@@ -104,7 +105,14 @@ namespace Redshift
             {
                 Bounds = new Rectangle(400, 100, 128, 128),
                 Layer = CollisionLayer.Enemy,
-                CollidesWith = CollisionLayer.Player | CollisionLayer.Projectile
+                CollidesWith = CollisionLayer.Player | CollisionLayer.Projectile,
+                HandleCollision = null
+            });
+
+            EntityManager.AddComponent<EntityAttributes>(enemy, new EntityAttributes
+            {
+                MovementSpeed = 100,
+                Hitpoints = 100,
             });
 
             // Simple move to the left and right
@@ -141,7 +149,17 @@ namespace Redshift
                 foreach(var collision in collisions)
                 {
                     if (collision.Item1.Id == 1)
-                        EntityManager.DeleteEntity(collision.Item2);
+                    {
+                        var collider1 = EntityManager.GetComponent<Collider>(collision.Item1);
+                        var collider2 = EntityManager.GetComponent<Collider>(collision.Item2);
+
+                        if (collider1.HandleCollision != null)
+                            collider1.HandleCollision(collision.Item2);
+
+                        if (collider2.HandleCollision != null)
+                            collider2.HandleCollision(collision.Item1);
+                    }
+
 
                     Console.WriteLine("Entity {0} collided with entity {1}", collision.Item1.Id, collision.Item2.Id);
                 }

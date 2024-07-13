@@ -1,5 +1,6 @@
 ﻿using Redshift.Commands;
 using Microsoft.Xna.Framework;
+using System;
 
 namespace Redshift.Behaviors
 {
@@ -17,8 +18,9 @@ namespace Redshift.Behaviors
         public int Priority;
         public int Limit;
         public int Completions;
+        public Action Callback;
 
-        public BehaviorProperties(Entity entity, BehaviorType type, float delay, int priority, int limit=0)
+        public BehaviorProperties(Entity entity, BehaviorType type, float delay, int priority, Action callback = null, int limit=0)
         {
             Entity = entity;
             Type = type;
@@ -26,6 +28,7 @@ namespace Redshift.Behaviors
             Priority = priority;
             Limit = limit;
             Completions = 0;
+            Callback = callback;
         }
     }
 
@@ -36,7 +39,8 @@ namespace Redshift.Behaviors
         public float Delay { get; }
         public int Priority { get; }
         public int Limit { get; }
-        public int Completions { get; set;  }
+        public int Completions { get; set; }
+        public Action Callback { get; private set; }
 
         protected Behavior (BehaviorProperties properties)
         {
@@ -46,6 +50,7 @@ namespace Redshift.Behaviors
             Priority = properties.Priority;
             Limit = properties.Limit;
             Completions = properties.Completions;
+            Callback = properties.Callback;
         }
 
         // This may need to be a List of commands

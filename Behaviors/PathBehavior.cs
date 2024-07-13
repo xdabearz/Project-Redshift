@@ -27,7 +27,10 @@ namespace Redshift.Behaviors
         public override Command Execute(World world, GameTime gameTime)
         {
             if (Type == BehaviorType.Limited && Completions >= Limit)
+            {
+                Callback();
                 return null;
+            }
 
             var transform = world.EntityManager.GetComponent<TransformComponent>(Entity);
 
