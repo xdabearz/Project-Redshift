@@ -1,5 +1,4 @@
-﻿using Redshift.Commands;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -10,7 +9,6 @@ namespace Redshift
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
         private World world;
-        private InputState input;
 
         public Game1()
         {
@@ -26,9 +24,6 @@ namespace Redshift
             graphics.ApplyChanges();
 
             world = new World();
-
-            // This is relative to where the .exe runs from. Will be created on runtime if it doesn't exist
-            input = new InputState("Data/keybinds.json");
 
             base.Initialize();
         }
@@ -46,26 +41,10 @@ namespace Redshift
 
         protected override void Update(GameTime gameTime)
         {
-            // Capture the input
-            input.GetCurrentInputState();
-
             // Special case exit for now
-            if (input.CurrentKeyboardState.IsKeyDown(Keys.Escape))
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
                 Exit();
-            }
-
-            // Create actions based on the input. This is sent to all entities with an input component
-            // where inputEnabled is true
-            if (input.Movement.Length() > 0.0f)
-            {
-                world.QueueInputCommand(input.Movement, "Move", gameTime);
-            }
-
-            if (input.CurrentKeyboardState.IsKeyDown(input.GetKeybind("FireWeapon")))
-            {
-                // Yeah, this needs to change. Having to pass the movement even for non-movement commands is bad
-                world.QueueInputCommand(Vector2.Zero, "Shoot", gameTime);
             }
 
             world.Update(gameTime);

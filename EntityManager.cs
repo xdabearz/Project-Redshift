@@ -179,10 +179,13 @@ namespace Redshift
             else if (typeof(T) == typeof(InputComponent)) return ComponentFlag.InputComponent;
             else if (typeof(T) == typeof(GraphicComponent)) return ComponentFlag.GraphicComponent;
             else if (typeof(T) == typeof(Collider)) return ComponentFlag.Collider;
-            else if (typeof(T) == typeof(EntityAttributes)) return ComponentFlag.EntityAttributes;
+            else if (typeof(T) == typeof(Stats)) return ComponentFlag.Stats;
             else if (typeof(T) == typeof(WeaponsList)) return ComponentFlag.WeaponsList;
             else if (typeof(T) == typeof(WeaponDetails)) return ComponentFlag.WeaponDetails;
             else if (typeof(T) == typeof(AIBehaviorComponent)) return ComponentFlag.AIBehaviorComponent;
+            else if (typeof(T) == typeof(MovementComponent)) return ComponentFlag.MovementComponent;
+            else if (typeof(T) == typeof(InputState)) return ComponentFlag.InputState;
+            else if (typeof(T) == typeof(CommandComponent)) return ComponentFlag.CommandComponent;
             else throw new InvalidOperationException("Unsupported component type");
         }
     }

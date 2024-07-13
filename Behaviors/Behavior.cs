@@ -1,7 +1,4 @@
-﻿using Redshift.Commands;
-using Microsoft.Xna.Framework;
-
-namespace Redshift.Behaviors
+﻿namespace Redshift.Behaviors
 {
     internal enum BehaviorType
     {
@@ -47,8 +44,5 @@ namespace Redshift.Behaviors
             Limit = properties.Limit;
             Completions = properties.Completions;
         }
-
-        // This may need to be a List of commands
-        public abstract Command Execute(World world, GameTime gameTime);
     }
 }

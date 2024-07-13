@@ -7,7 +7,7 @@ namespace Redshift
 {
     // InputState holds all the various types of input together
     // For now, this is just mouse and keyboard
-    public class InputState
+    public class InputStateHandler
     {
         // Keybinds info
         // This likely would make more sense if moved out of this class into an input handling system
@@ -25,7 +25,7 @@ namespace Redshift
         // There is probably a better way to store these types of joint inputs
         public Vector2 Movement { get; private set; }
 
-        public InputState(string filePath)
+        public InputStateHandler(string filePath)
         {
             string exePath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             string[] paths = { exePath, filePath };

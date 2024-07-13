@@ -1,8 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Redshift.Behaviors;
-using Redshift.Commands;
 using System.Collections.Generic;
-using System.ComponentModel;
 
 namespace Redshift.Systems
 {

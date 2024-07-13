@@ -1,29 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
 
 namespace Redshift.Systems
 {
-    // This may be better merged into MoveSystem
-    internal class CollisionSystem
+    internal class CollisionSystem : ECSSystem
     {
-        private EntityManager entityManager;
+        public CollisionSystem(World world) : base(world) { }
 
-        public CollisionSystem(EntityManager entityManager) 
+        public override void Update(GameTime gameTime)
         {
-            this.entityManager = entityManager;
-        }
-
-        public List<(Entity, Entity)> CheckCollisions()
-        {
-            List<(Entity, Entity)> collisions = new();
-
             // This is a pretty slow check, runs in O(n^2) time. May want to speed up
             // later with something like a quadtree or uniform grid
 
-            List<Entity> entities = entityManager.GetEntitiesByFlag(ComponentFlag.TransformComponent | ComponentFlag.Collider);
+            List<Entity> entities = World.EntityManager.GetEntitiesByFlag(ComponentFlag.TransformComponent | ComponentFlag.Collider);
 
             for (int i = 0; i < entities.Count; i++)
             {
-                var colliderA = entityManager.GetComponent<Collider>(entities[i]);
+                var colliderA = World.EntityManager.GetComponent<Collider>(entities[i]);
 
                 if (colliderA.Layer == CollisionLayer.None)
                     continue;
@@ -34,18 +28,19 @@ namespace Redshift.Systems
                     if (entities[i].Id == entities[j].Id)
                         continue;
 
-                    var colliderB = entityManager.GetComponent<Collider>(entities[j]);
-                    
-                    // If the 2 objects don't collider, do nothing
+                    var colliderB = World.EntityManager.GetComponent<Collider>(entities[j]);
+
+                    // If the 2 objects don't collide, do nothing
                     if (!colliderB.CollidesWith.HasFlag(colliderA.Layer))
                         continue;
 
                     if (colliderA.Bounds.Intersects(colliderB.Bounds))
-                        collisions.Add((entities[i], entities[j]));
+                    {
+                        // TODO: Add some sort of collision resolve component to entity A
+                        Console.WriteLine("Entity {0} collided with entity {1}.", entities[i].Id, entities[j].Id);
+                    }
                 }
             }
-
-            return collisions;
         }
     }
 }

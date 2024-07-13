@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Redshift.Behaviors;
 
 namespace Redshift
@@ -13,10 +14,13 @@ namespace Redshift
         TransformComponent = 1 << 1,
         InputComponent = 1 << 2,
         Collider = 1 << 3,
-        EntityAttributes = 1 << 4,
+        Stats = 1 << 4,
         WeaponsList = 1 << 5,
         WeaponDetails = 1 << 6,
         AIBehaviorComponent = 1 << 7,
+        MovementComponent = 1 << 8,
+        InputState = 1 << 9,
+        CommandComponent = 1 << 10,
     }
 
     internal abstract class Component 
@@ -58,10 +62,11 @@ namespace Redshift
         public CollisionLayer CollidesWith;
     }
 
-    internal class EntityAttributes : Component
+    internal class Stats : Component
     {
         public float MovementSpeed;
-        public int Hitpoints;
+        public int CurrentHP;
+        public int MaxHP;
     }
 
     // This struct can likely get very big. Maybe not the best way to handle weapons, but
@@ -92,4 +97,32 @@ namespace Redshift
             Behaviors = new();
         }
     }
+
+    internal class MovementComponent : Component
+    {
+        public Vector2 Velocity;
+    }
+
+    internal class InputState : Component
+    {
+        public MouseState CurrentMouseState;
+        public MouseState PreviousMouseState;
+        public KeyboardState CurrentKeyboardState;
+        public KeyboardState PreviousKeyboardState;
+        public Vector2 Movement;
+        public Dictionary<string, Keys> Keybinds;
+    }
+
+    internal class CommandComponent : Component
+    {
+        public CommandType Type;
+    }
+
+    internal enum CommandType
+    {
+        None,
+        Shoot,
+        Move
+    }
+
 }

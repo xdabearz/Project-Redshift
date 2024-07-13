@@ -13,10 +13,11 @@ namespace Redshift
     {
         // Systems & Managers
         public EntityManager EntityManager { get; private set; }
+        
+        private readonly List<ECSSystem> LogicSystems;
+        private List<ECSSystem> GraphicSystems;
 
-        public MoveSystem MoveSystem { get; private set; }
         public EnemySystem EnemySystem { get; private set; }
-        public CollisionSystem CollisionSystem { get; private set; }
         public WeaponSystem WeaponSystem { get; private set; }
         public BehaviorSystem BehaviorSystem { get; private set; }
         public FollowCamera Camera { get; private set; }
@@ -28,19 +29,27 @@ namespace Redshift
         private bool enemySpawned;
         private PathBehavior enemyBehavior;
         private Entity enemy;
-        private Queue<Command> commands;
 
         public World()
         {
             EntityManager = new EntityManager();
-            MoveSystem = new MoveSystem(EntityManager);
+
+            // These systems are updated in order inside the Update loop
+            LogicSystems = new()
+            {
+                new InputCaptureSystem(this),
+                new CollisionMovementSystem(this),
+                new MovementSystem(this),
+                new CollisionSystem(this),
+            };
+
+            GraphicSystems = new List<ECSSystem>();
+
             EnemySystem = new EnemySystem(EntityManager);
-            CollisionSystem = new CollisionSystem(EntityManager);
             WeaponSystem = new WeaponSystem(this, EntityManager);
             BehaviorSystem = new BehaviorSystem(this, EntityManager);
 
             GameTime = new GameTime();
-            commands = new();
         }
 
         public void CreatePlayer(ContentManager content)
@@ -71,19 +80,6 @@ namespace Redshift
                 Damage = 20,
                 ProjectileSpeed = 1500
             });
-        }
-
-        public void QueueInputCommand(Vector2 moveDirection, string inputType, GameTime gameTime)
-        {
-            // Commands are tightly coupled with world right now, so this probably needs to be revisited
-            if (inputType == "Move")
-            {
-                commands.Enqueue(new MoveCommand(this, moveDirection * moveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds));
-            }
-            else if (inputType == "Shoot")
-            {
-                commands.Enqueue(new ShootCommand(this, gameTime));
-            }
         }
 
         public void SpawnEnemy(ContentManager content) 
@@ -119,33 +115,12 @@ namespace Redshift
         {
             GameTime = gameTime;
 
-            // Maybe move this outside the update call?
-            List<Entity> inputEntites = EntityManager.GetEntitiesByFlag(ComponentFlag.InputComponent);
-
-            // The input commands get propagated to all input entities
-            while (commands.Count > 0)
+            foreach (ECSSystem system in LogicSystems)
             {
-                Command inputCommand = commands.Dequeue();
-                foreach (Entity entity in inputEntites)
-                {
-                    inputCommand.Execute(entity);
-                }
+                system.Update(gameTime);
             }
 
             BehaviorSystem.RunBehaviors(gameTime);
-
-            // Collision checking after movement
-            List<(Entity, Entity)> collisions = CollisionSystem.CheckCollisions();
-            if (collisions.Count > 0)
-            {
-                foreach(var collision in collisions)
-                {
-                    if (collision.Item1.Id == 1)
-                        EntityManager.DeleteEntity(collision.Item2);
-
-                    Console.WriteLine("Entity {0} collided with entity {1}", collision.Item1.Id, collision.Item2.Id);
-                }
-            }
 
             EntityManager.CleanupEntities();
             Camera.Update();
