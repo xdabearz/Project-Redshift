@@ -59,7 +59,7 @@ namespace Redshift.Systems
 
             Vector2[] bulletPath =
             {
-                 origin + new Vector2(0, -1000) // Move up 1000 pixels and stop
+                 origin + new Vector2(0, -1500) // Move up 1500 pixels and stop
             };
 
             // Now create the bullet entity

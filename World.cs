@@ -55,11 +55,11 @@ namespace Redshift
             });
             EntityManager.AddComponent<TransformComponent>(playerEntity, new TransformComponent
             {
-                Position = new Vector2(400, 400)
+                Position = new Vector2(400, 1000)
             });
             EntityManager.AddComponent<Collider>(playerEntity, new Collider
             {
-                Bounds = new Rectangle(400, 400, 128, 128),
+                Bounds = new Rectangle(400, 1000, 128, 128),
                 Layer = CollisionLayer.Player,
                 CollidesWith = CollisionLayer.Enemy | CollisionLayer.Environment
             });
